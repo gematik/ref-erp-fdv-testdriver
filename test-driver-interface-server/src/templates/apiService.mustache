@@ -1,0 +1,43 @@
+package org.openapitools.api;
+
+import org.openapitools.api.*;
+
+import org.glassfish.jersey.media.multipart.FormDataBodyPart;
+
+import org.openapitools.model.AuditEvent;
+import org.openapitools.model.Communication;
+import org.openapitools.model.ErpTestdriverApiV1InfoGet400Response;
+import org.openapitools.model.ErpTestdriverApiV1LoginPut400Response;
+import org.openapitools.model.ErpTestdriverApiV1PharmacyAssignmentPostRequest;
+import org.openapitools.model.Info;
+import org.openapitools.model.LoginSuccess;
+import org.openapitools.model.MedicationDispense;
+import org.openapitools.model.Pharmacy;
+import org.openapitools.model.Prescription;
+
+import java.util.List;
+import org.openapitools.api.NotFoundException;
+
+import java.io.InputStream;
+
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+import javax.validation.constraints.*;
+import javax.validation.Valid;
+
+public abstract class ErpApiService {
+public abstract Response erpTestdriverApiV1AuditEventsGet(SecurityContext securityContext) throws NotFoundException;
+public abstract Response erpTestdriverApiV1CommunicationGet(SecurityContext securityContext) throws NotFoundException;
+public abstract Response erpTestdriverApiV1CommunicationIdDelete(String id,SecurityContext securityContext) throws NotFoundException;
+public abstract Response erpTestdriverApiV1InfoGet(SecurityContext securityContext) throws NotFoundException;
+public abstract Response erpTestdriverApiV1LoginPut(String body,SecurityContext securityContext) throws NotFoundException;
+public abstract Response erpTestdriverApiV1MedicationdispenseGet(String whenhandedover,SecurityContext securityContext) throws NotFoundException;
+public abstract Response erpTestdriverApiV1Pharmacy2dCodePost(String body,SecurityContext securityContext) throws NotFoundException;
+public abstract Response erpTestdriverApiV1PharmacyAssignmentPost(Object body,SecurityContext securityContext) throws NotFoundException;
+public abstract Response erpTestdriverApiV1PharmacySearchGet(String near,String addressCity,String name,SecurityContext securityContext) throws NotFoundException;
+public abstract Response erpTestdriverApiV1PrescriptionGet(SecurityContext securityContext) throws NotFoundException;
+public abstract Response erpTestdriverApiV1PrescriptionIdDelete(String id,SecurityContext securityContext) throws NotFoundException;
+public abstract Response erpTestdriverApiV1PrescriptionIdGet(String id,SecurityContext securityContext) throws NotFoundException;
+public abstract Response erpTestdriverApiV1StartPut(SecurityContext securityContext) throws NotFoundException;
+public abstract Response erpTestdriverApiV1StopPut(SecurityContext securityContext) throws NotFoundException;
+}
