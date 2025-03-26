@@ -1,0 +1,13 @@
+package {{package}}.factories;
+
+import {{package}}.{{classname}}Service;
+import de.gematik.test.erezept.remotefdv.server.impl.ErpApiServiceImpl;
+
+{{>generatedAnnotation}}
+public class {{classname}}ServiceFactory {
+private static final {{classname}}Service service = new {{classname}}ServiceImpl();
+
+public static {{classname}}Service get{{classname}}() {
+return service;
+}
+}
