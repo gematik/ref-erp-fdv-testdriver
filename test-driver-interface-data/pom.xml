@@ -6,12 +6,12 @@
     <parent>
         <groupId>de.gematik.erezept.remotefdv</groupId>
         <artifactId>erp-fdv-test-driver-interface</artifactId>
-        <version>0.16.0</version>
+        <version>1.0.1</version>
     </parent>
 
     <artifactId>test-driver-interface-data</artifactId>
     <name>Test Driver Interface Data</name>
-    <description>TDI Data for Server</description>
+    <description>TDI Data contains generated classes from OpenAPI specification in target directory</description>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
