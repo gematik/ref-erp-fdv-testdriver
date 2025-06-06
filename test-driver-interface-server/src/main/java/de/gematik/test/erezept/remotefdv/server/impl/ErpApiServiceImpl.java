@@ -12,6 +12,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * *******
+ *
+ * For additional notes and disclaimer from gematik and in case of changes by gematik find details in the "Readme" file.
  */
 
 package de.gematik.test.erezept.remotefdv.server.impl;
@@ -33,6 +37,7 @@ import de.gematik.test.erezept.fhir.values.json.CommunicationDisReqMessage;
 import de.gematik.test.erezept.remotefdv.server.actors.Patient;
 import de.gematik.test.erezept.remotefdv.server.config.MyConfigurationFactory;
 import de.gematik.test.erezept.remotefdv.server.config.TestFdVFactory;
+import de.gematik.test.erezept.remotefdv.server.exceptions.NoSuchEnvironmentException;
 import de.gematik.test.erezept.remotefdv.server.mapping.*;
 import de.gematik.test.erezept.remotefdv.server.search.MedicationDispenseSearch;
 import de.gematik.test.erezept.screenplay.util.DataMatrixCodeGenerator;
@@ -51,6 +56,7 @@ import kong.unirest.core.json.JSONException;
 import kong.unirest.core.json.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.apache.commons.lang3.NotImplementedException;
 import org.openapitools.api.ApiResponseMessage;
 import org.openapitools.api.ErpApiService;
 import org.openapitools.api.NotFoundException;
@@ -160,12 +166,16 @@ public class ErpApiServiceImpl extends ErpApiService {
   @Override
   public Response erpTestdriverApiV1InfoGet(SecurityContext securityContext)
       throws NotFoundException {
+    val responseBuilder = checkRequiredFields();
+    if (responseBuilder.build().getStatus() >= 400) {
+      return responseBuilder.build();
+    }
     val info = InformationBuilder.build(startTime);
     val activeEnv = mcf.getActiveEnvConfig().getName();
     val fdBaseUrl = mcf.getActiveEnvConfig().getInternet().getFdBaseUrl();
 
     val testEnvironment = new TestEnvironmentInfo();
-    testEnvironment.setName(TestEnvironmentInfo.NameEnum.valueOf(activeEnv));
+    testEnvironment.setName(TestEnvironmentInfo.NameEnum.fromValue(activeEnv));
     testEnvironment.setServiceUrl(TestEnvironmentInfo.ServiceUrlEnum.fromValue(fdBaseUrl));
     info.setTestEnvironment(testEnvironment);
     return Response.ok().entity(info).build();
@@ -197,7 +207,13 @@ public class ErpApiServiceImpl extends ErpApiService {
       throw new RuntimeException(e);
     }
     egk = mcf.getEgkByKvnr(kvnr);
-    erpClient = mcf.createErpClientForPatient(kvnr, patient);
+    try {
+      erpClient = mcf.createErpClientForPatient(kvnr, patient);
+    } catch (NoSuchEnvironmentException e) {
+      return Response.status(400)
+          .entity(new ApiResponseMessage(ApiResponseMessage.ERROR, e.getMessage()))
+          .build();
+    }
     erpClient.authenticateWith(egk);
 
     LoginSuccess loginSuccess = new LoginSuccess();
@@ -429,8 +445,54 @@ public class ErpApiServiceImpl extends ErpApiService {
           .build();
     }
     patient = null;
+    erpClient = null;
     return Response.ok()
         .entity(new ApiResponseMessage(ApiResponseMessage.OK, "Test-FdV is not running"))
         .build();
+  }
+
+  @Override
+  public Response erpTestdriverApiV1ConsentPost(
+      ConsentCategory category, SecurityContext securityContext) throws NotFoundException {
+    throw new NotImplementedException("This function is not implemented yet");
+  }
+
+  @Override
+  public Response erpTestdriverApiV1ConsentDelete(
+      ConsentCategory category, SecurityContext securityContext) throws NotFoundException {
+    throw new NotImplementedException("This function is not implemented yet");
+  }
+
+  @Override
+  public Response erpTestdriverApiV1ConsentGet(
+      ConsentCategory category, SecurityContext securityContext) throws NotFoundException {
+    throw new NotImplementedException("This function is not implemented yet");
+  }
+
+  @Override
+  public Response erpTestdriverApiV1EuAccessAuthorizationPost(
+      String country, String accessCode, SecurityContext securityContext) throws NotFoundException {
+    throw new NotImplementedException("This function is not implemented yet");
+  }
+
+  @Override
+  public Response erpTestdriverApiV1EuAccessAuthorizationDelete(SecurityContext securityContext)
+      throws NotFoundException {
+    throw new NotImplementedException("This function is not implemented yet");
+  }
+
+  @Override
+  public Response erpTestdriverApiV1EuAccessAuthorizationGet(SecurityContext securityContext)
+      throws NotFoundException {
+    throw new NotImplementedException("This function is not implemented yet");
+  }
+
+  @Override
+  public Response erpTestdriverApiV1PrescriptionIdPatch(
+      String id,
+      ErpTestdriverApiV1PrescriptionIdPatchRequest patchRequest,
+      SecurityContext securityContext)
+      throws NotFoundException {
+    throw new NotImplementedException("This function is not implemented yet");
   }
 }

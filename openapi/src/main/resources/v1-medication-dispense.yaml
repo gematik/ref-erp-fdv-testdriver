@@ -1,0 +1,51 @@
+components:
+  responses:
+    MedicationDispenses:
+      description: "A list of all dispense information for the patient"
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              oneOf:
+                - $ref: '#/components/schemas/EU-MedicationDispense'
+                - $ref: '#/components/schemas/MedicationDispense'
+  schemas:
+    MedicationDispense:
+      description: "Includes reduced dispensing information for an e-prescription"
+      type: object
+      properties:
+        prescriptionId:
+          $ref: './v1-prescription.yaml#/components/schemas/PrescriptionId'
+        medication:
+          $ref: './v1-medication.yaml#/components/schemas/Medication'
+        pharmacist:
+          $ref: './v1-healthcare-providers.yaml#/components/schemas/Pharmacist'
+        whenhandedover:
+          type: string
+          format: date
+          example: "2020-03-20"
+      required:
+        - prescriptionId
+        - medication
+        - pharmacist
+        - whenhandedover
+    EU-MedicationDispense:
+      description: "Includes reduced dispensing information for an e-prescription"
+      type: object
+      properties:
+        prescriptionId:
+          $ref: './v1-prescription.yaml#/components/schemas/PrescriptionId'
+        medication:
+          $ref: './v1-medication.yaml#/components/schemas/Medication'
+        pharmacy:
+          $ref: './v1-healthcare-providers.yaml#/components/schemas/Pharmacy'
+        whenhandedover:
+          type: string
+          format: date
+          example: "2020-03-20"
+      required:
+        - prescriptionId
+        - medication
+        - pharmacy
+        - whenhandedover

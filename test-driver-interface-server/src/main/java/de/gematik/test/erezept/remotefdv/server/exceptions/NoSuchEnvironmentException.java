@@ -18,17 +18,12 @@
  * For additional notes and disclaimer from gematik and in case of changes by gematik find details in the "Readme" file.
  */
 
-package de.gematik.test.erezept.remotefdv.server.webservice.search;
+package de.gematik.test.erezept.remotefdv.server.exceptions;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static java.text.MessageFormat.format;
 
-import de.gematik.bbriccs.utils.PrivateConstructorsUtil;
-import de.gematik.test.erezept.remotefdv.server.search.MedicationDispenseSearch;
-import org.junit.jupiter.api.Test;
-
-class MedicationDispenseSearchTest {
-  @Test
-  void shouldNotInstantiate() {
-    assertTrue(PrivateConstructorsUtil.isUtilityConstructor(MedicationDispenseSearch.class));
+public class NoSuchEnvironmentException extends RuntimeException {
+  public NoSuchEnvironmentException(String environment) {
+    super(format("Invalid Environment: {0}", environment));
   }
 }

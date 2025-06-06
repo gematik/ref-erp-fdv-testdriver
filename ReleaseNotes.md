@@ -1,5 +1,13 @@
 # Release Notes ERP FdV Test Driver Interface
 
+## Release 1.0.6
+
+* openapi:
+  - extracted schema definitions from ErpTestDriver.yaml into separate .yaml files for a better clarity
+  - added features for EU-Prescription
+
+
+    
 ## Release 1.0.1
 
 This is the initial release of the erp fdv test driver interface and their modules.

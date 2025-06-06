@@ -1,0 +1,192 @@
+components:
+  responses:
+    TestDriverError:
+      description: "Error processing the request with the test driver"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+                example: "Test-FdV is currently not running"
+    TestDriverInfo:
+      description: "Test driver interface is ready for use"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Info"
+    TestFdVError:
+      description: "The error is used to describe an OperationOutcome or a technical error, e.g. VAU encryption error"
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: "#/components/schemas/OperationOutcome"
+              - $ref: "#/components/schemas/TechnicalError"
+    Successful:
+      description: "Operation was successful"
+    Login:
+      description: ""
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/LoginSuccess"
+    Forbidden:
+      description: "Forbidden - you are not allowed to do this"
+
+  requestBodies:
+    Login:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "./v1-patient.yaml#/components/schemas/Kvid"
+  schemas:
+    Info:
+      properties:
+        title:
+          type: string
+          description: "Title of the application"
+          example: "Test driver interface of ERP Test-FdV Module"
+        testDriverVersion:
+          type: string
+          description: "Version of the implemented test driver version"
+          example: "1.0.0"
+        startTime:
+          type: string
+          format: date-time
+          example: "2020-03-02T08:25:05+00:00"
+        testFdV:
+          $ref: "#/components/schemas/TestFdV"
+        testEnvironment:
+          $ref: "#/components/schemas/TestEnvironmentInfo"
+      required:
+        - testDriverVersion
+        - testEnvironment
+        - testFdV
+        - title
+        - startTime
+    LoginSuccess:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          description: "IDP Token"
+          format: bearer
+      required:
+        - accessToken
+    OperationOutcome:
+      allOf:
+        - $ref: "#/components/schemas/Error"
+        - type: object
+          properties:
+            code:
+              type: string
+              enum:
+                - invalid
+                - unknown
+                - forbidden
+                - not_found
+                - not_supported
+                - conflict
+                - processing
+                - value
+                - transient
+              default: "processing"
+              description: "http status error type"
+            errorCode:
+              type: string
+              example: "1231273123"
+            diagnostics:
+              type: string
+              description: "additional details"
+              example: ""
+          required:
+            - code
+            - errorCode
+    TechnicalError:
+      $ref: "#/components/schemas/Error"
+    Error:
+      type: object
+      properties:
+        statusCode:
+          type: number
+          description: "Http StatusCode"
+          minimum: 300
+          maximum: 500
+          example: 401
+        details:
+          type: string
+          example: "Missing header field"
+          description: "Short Description of the error"
+      required:
+        - statusCode
+        - details
+    TestEnvironmentInfo:
+      description: "Information about the test environment that is used"
+      required:
+        - name
+        - serviceUrl
+      type: object
+      properties:
+        name:
+          type: string
+          enum:
+            - TU
+            - RU
+            - RU-DEV
+          example: "TU"
+        serviceUrl:
+          type: string
+          enum:
+            - "https://erp-test.app.ti-dienste.de"
+            - "https://erp-ref.app.ti-dienste.de"
+            - "https://erp-dev.app.ti-dienste.de"
+          description: "Service Endpoint"
+          example: "https://erp-test.app.ti-dienste.de"
+    TestFdV:
+      type: object
+      properties:
+        platform:
+          type: string
+          description: "Mobile Device Platform"
+          enum:
+            - Android
+            - iOS
+            - Huawei
+          example: "Android"
+        platformVersion:
+          type: string
+          example: "14.0.0"
+        isEmulated:
+          type: boolean
+          example: true
+        status:
+          description: "Current status of the test driver"
+          type: string
+          enum:
+            - running
+            - starting
+            - stopped
+          example: running
+        startTime:
+          type: string
+          format: date-time
+          example: "2020-03-02T08:25:05+00:00"
+      required:
+        - platform
+        - platformVersion
+        - isEmulated
+        - status
+        - startTime
+    System:
+      type: string
+      enum: [ "ERP-FD", "Exporter" ]
+      example: "ERP-FD"
+    CountryIso3166:
+      type: string
+      description: "iso:3166"
+      example: "GR"
+      minLength: 2
+      maxLength: 2

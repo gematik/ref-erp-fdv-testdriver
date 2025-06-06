@@ -1,0 +1,29 @@
+components:
+  responses:
+    Consent:
+      description: "Consent for storing billing information or using e-prescriptions within the EU."
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Consent'
+  schemas:
+    # Consent
+    Consent:
+      type: object
+      properties:
+        kvnr:
+          $ref: "./v1-patient.yaml#/components/schemas/Kvid"
+        category:
+          $ref: "#/components/schemas/ConsentCategory"
+        dateTime:
+          type: string
+          format: date-time
+          example: "2020-03-12T18:01:10+00:00"
+      required:
+        - category
+        - kvnr
+        - dateTime
+    ConsentCategory:
+      type: string
+      enum: [ "CHARGCONS", "EUDISPCONS" ]
+      example: "CHARGCONS"

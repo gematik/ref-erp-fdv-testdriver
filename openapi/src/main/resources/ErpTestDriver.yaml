@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: "Test drive interface for e-Prescription FdV Module"
   description: "REST interface to automate the test of a e-Prescription FdV Module implementation."
-  version: 1.2.1
+  version: 2.0.0
   contact:
     name: gematik GmbH
     email: software-development@gematik.de
@@ -21,15 +21,18 @@ tags:
   - name: Login
     description: "Operations to login with eID or smart card"
   - name: E-Prescription
-    description: "Retrieve a list of e-prescriptions or retrieve a single e-prescription by id"
+    description: "Operations for retrieving, deleting and patching e-prescriptions"
   - name: Dispensing information
     description: "Retrieve a list of medication dispenses"
   - name: Audit Events
     description: "Retrieve a list of audit events"
   - name: Pharmacy
     description: "Assigning an e-prescription to a pharmacy and searching for a pharmacy based on certain parameters"
-  - name: Communication
-    description: ""
+  - name: Consent
+    description: "Operations to create, delete or retrieve a consent for a patient by category"
+  - name: EU-Prescription
+    description: "Operations to redeem e-prescriptions in other EU countries"
+
 paths:
   /erp/testdriver/api/v1/info:
     get:
@@ -38,11 +41,11 @@ paths:
         - Info
       responses:
         200:
-          $ref: "#/components/responses/TestDriverInfo"
+          $ref: "./v1-commons.yaml#/components/responses/TestDriverInfo"
         400:
-          $ref: "#/components/responses/TestDriverError"
+          $ref: "./v1-commons.yaml#/components/responses/TestDriverError"
         403:
-          $ref: "#/components/responses/Forbidden"
+          $ref: "./v1-commons.yaml#/components/responses/Forbidden"
   /erp/testdriver/api/v1/start:
     put:
       summary: "Start die Test-FdV"
@@ -50,11 +53,11 @@ paths:
         - Info
       responses:
         200:
-          $ref: "#/components/responses/Successful"
+          $ref: "./v1-commons.yaml#/components/responses/Successful"
         400:
-          $ref: "#/components/responses/TestDriverError"
+          $ref: "./v1-commons.yaml#/components/responses/TestDriverError"
         403:
-          $ref: "#/components/responses/Forbidden"
+          $ref: "./v1-commons.yaml#/components/responses/Forbidden"
   /erp/testdriver/api/v1/stop:
     put:
       summary: "Stop die Test-FdV"
@@ -62,25 +65,25 @@ paths:
         - Info
       responses:
         200:
-          $ref: "#/components/responses/Successful"
+          $ref: "./v1-commons.yaml#/components/responses/Successful"
         400:
-          $ref: "#/components/responses/TestDriverError"
+          $ref: "./v1-commons.yaml#/components/responses/TestDriverError"
         403:
-          $ref: "#/components/responses/Forbidden"
+          $ref: "./v1-commons.yaml#/components/responses/Forbidden"
   /erp/testdriver/api/v1/login:
     put:
       summary: "Operation to login with an kvnr"
       tags:
         - Login
       requestBody:
-        $ref: "#/components/requestBodies/Login"
+        $ref: "./v1-commons.yaml#/components/requestBodies/Login"
       responses:
         200:
-          $ref: "#/components/responses/Login"
+          $ref: "./v1-commons.yaml#/components/responses/Login"
         400:
-          $ref: "#/components/responses/TestFdVError"
+          $ref: "./v1-commons.yaml#/components/responses/TestFdVError"
         403:
-          $ref: "#/components/responses/Forbidden"
+          $ref: "./v1-commons.yaml#/components/responses/Forbidden"
   /erp/testdriver/api/v1/prescription:
     get:
       summary: "Operation to retrieve a list (max. 50 entries) of e-prescriptions, sorted in descending order by creation date"
@@ -88,59 +91,69 @@ paths:
       See https://github.com/gematik/api-erp/blob/master/docs/erp_versicherte.adoc#alle-e-rezepte-ansehen"
       tags:
         - E-Prescription
+        - EU-Prescription
       responses:
         200:
-          $ref: "#/components/responses/Prescriptions"
+          $ref: "./v1-prescription.yaml#/components/responses/Prescriptions"
         400:
-          $ref: "#/components/responses/TestFdVError"
+          $ref: "./v1-commons.yaml#/components/responses/TestFdVError"
         403:
-          $ref: "#/components/responses/Forbidden"
+          $ref: "./v1-commons.yaml#/components/responses/Forbidden"
   /erp/testdriver/api/v1/prescription/{id}:
+    parameters:
+      - name: id
+        required: true
+        in: path
+        schema:
+          $ref: "./v1-prescription.yaml#/components/schemas/PrescriptionId"
     get:
       summary: "Operation to download a single e-prescription"
       description: "UC: E-Rezepte empfangen
             See https://github.com/gematik/api-erp/blob/master/docs/erp_versicherte.adoc#ein-einzelnes-e-rezept-abrufen-und-in-der-apotheke-einl%C3%B6sen"
       tags:
         - E-Prescription
-      parameters:
-        - name: id
-          required: true
-          in: path
-          schema:
-            $ref: "#/components/schemas/PrescriptionId"
+        - EU-Prescription
       responses:
         200:
-          $ref: "#/components/responses/Prescription"
+          $ref: "./v1-prescription.yaml#/components/responses/Prescription"
         400:
-          $ref: "#/components/responses/TestFdVError"
+          $ref: "./v1-commons.yaml#/components/responses/TestFdVError"
         403:
-          $ref: "#/components/responses/Forbidden"
+          $ref: "./v1-commons.yaml#/components/responses/Forbidden"
     delete:
-      summary: "Operation to deletes an e-prescription"
-      description: "UC: E-Rezepte am E-Rezept Fachdienst löschen
-      See https://github.com/gematik/api-erp/blob/master/docs/erp_versicherte.adoc#ein-e-rezept-l%C3%B6schen"
+      summary: "Operation to delete an e-prescription"
+      description: "UC: E-Rezepte am E-Rezept Fachdienst löschen See https://github.com/gematik/api-erp/blob/master/docs/erp_versicherte.adoc#ein-e-rezept-l%C3%B6schen"
       tags:
         - E-Prescription
-      parameters:
-        - name: id
-          required: true
-          in: path
-          schema:
-            $ref: "#/components/schemas/PrescriptionId"
       responses:
         204:
-          $ref: "#/components/responses/Successful"
+          $ref: "./v1-commons.yaml#/components/responses/Successful"
         403:
-          $ref: "#/components/responses/Forbidden"
+          $ref: "./v1-commons.yaml#/components/responses/Forbidden"
         400:
-          $ref: "#/components/responses/TestFdVError"
+          $ref: "./v1-commons.yaml#/components/responses/TestFdVError"
+    patch:
+      summary: "Operation to change an e-prescription. Currently, an e-prescription can be activated for redemption in other European countries."
+      description: "In the context of European e-prescriptions, an e-prescription must be activated. This can be controlled via the attribute RedeemableByPatient."
+      tags:
+        - E-Prescription
+        - EU-Prescription
+      requestBody:
+        $ref: "./v1-eu-prescription.yaml#/components/requestBodies/EU-RedeemableByPatient"
+      responses:
+        200:
+          $ref: "./v1-prescription.yaml#/components/responses/Prescription"
+        400:
+          $ref: "./v1-commons.yaml#/components/responses/TestFdVError"
+        403:
+          $ref: "./v1-commons.yaml#/components/responses/Forbidden"
   /erp/testdriver/api/v1/medicationdispense:
     get:
       summary: "Operation returns a list (max. 50 entries) of medication dispense information's, sorted in descending order by creation date"
-      description: "UC: Abgabeinformationen anzeigen
-      See https://github.com/gematik/api-erp/blob/master/docs/erp_versicherte.adoc#abgabeinformationen-abrufen"
+      description: "The response contains information on dispenses both in Germany and in other EU countries."
       tags:
         - Dispensing information
+        - EU-Prescription
       parameters:
         - name: whenhandedover
           in: query
@@ -150,11 +163,11 @@ paths:
             example: "gt2020-03-01"
       responses:
         200:
-          $ref: "#/components/responses/MedicationDispenses"
+          $ref: "./v1-medication-dispense.yaml#/components/responses/MedicationDispenses"
         403:
-          $ref: "#/components/responses/Forbidden"
+          $ref: "./v1-commons.yaml#/components/responses/Forbidden"
         400:
-          $ref: "#/components/responses/TestFdVError"
+          $ref: "./v1-commons.yaml#/components/responses/TestFdVError"
   /erp/testdriver/api/v1/auditEvents:
     get:
       summary: "Operation returns a list (max. 50 entries) of audit events, sorted in descending order by creation date"
@@ -164,14 +177,14 @@ paths:
         - Audit Events
       responses:
         200:
-          $ref: "#/components/responses/AuditEvents"
+          $ref: "./v1-auditevent.yaml#/components/responses/AuditEvents"
         403:
-          $ref: "#/components/responses/Forbidden"
+          $ref: "./v1-commons.yaml#/components/responses/Forbidden"
         400:
-          $ref: "#/components/responses/TestFdVError"
+          $ref: "./v1-commons.yaml#/components/responses/TestFdVError"
   /erp/testdriver/api/v1/pharmacy/search:
     get:
-      summary: ""
+      summary: "Operation to search for pharmacies based on specific attributes."
       description: "UC: Apotheke suchen
       See https://github.com/gematik/api-erp/blob/master/docs/erp_versicherte.adoc#eine-apotheke-aus-dem-apotheken-verzeichnis-ausw%C3%A4hlen"
       tags:
@@ -194,39 +207,39 @@ paths:
             example: "Apotheke%20um%20die%20Ecke"
       responses:
         200:
-          $ref: "#/components/responses/Pharmacies"
+          $ref: "./v1-healthcare-providers.yaml#/components/responses/Pharmacies"
         403:
-          $ref: "#/components/responses/Forbidden"
+          $ref: "./v1-commons.yaml#/components/responses/Forbidden"
         400:
-          $ref: "#/components/responses/TestFdVError"
+          $ref: "./v1-commons.yaml#/components/responses/TestFdVError"
   /erp/testdriver/api/v1/pharmacy/assignment:
     post:
       description: "Operation is intended to assign an e-prescription to a pharmacy"
       tags:
         - Pharmacy
       requestBody:
-        $ref: "#/components/requestBodies/PharmacyAssignment"
+        $ref: "./v1-communication.yaml#/components/requestBodies/PharmacyAssignment"
       responses:
         200:
-          $ref: "#/components/responses/PharmacyAssignment"
+          $ref: "./v1-communication.yaml#/components/responses/PharmacyAssignment"
         403:
-          $ref: "#/components/responses/Forbidden"
+          $ref: "./v1-commons.yaml#/components/responses/Forbidden"
         400:
-          $ref: "#/components/responses/TestFdVError"
+          $ref: "./v1-commons.yaml#/components/responses/TestFdVError"
   /erp/testdriver/api/v1/pharmacy/2dCode:
     post:
       description: "Operation generates e-prescription token as 2D code"
       tags:
         - Pharmacy
       requestBody:
-        $ref: "#/components/requestBodies/2DCode"
+        $ref: "./v1-healthcare-providers.yaml#/components/requestBodies/2DCode"
       responses:
         200:
-          $ref: "#/components/responses/2DCode"
+          $ref: "./v1-healthcare-providers.yaml#/components/responses/2DCode"
         403:
-          $ref: "#/components/responses/Forbidden"
+          $ref: "./v1-commons.yaml#/components/responses/Forbidden"
         400:
-          $ref: "#/components/responses/TestFdVError"
+          $ref: "./v1-commons.yaml#/components/responses/TestFdVError"
   /erp/testdriver/api/v1/communication:
     get:
       summary: "Operation returns a list (max. 50 entries) of communications for a patient, sorted in descending order by creation date"
@@ -236,14 +249,14 @@ paths:
         - Communication
       responses:
         200:
-          $ref: "#/components/responses/Communications"
+          $ref: "./v1-communication.yaml#/components/responses/Communications"
         403:
-          $ref: "#/components/responses/Forbidden"
+          $ref: "./v1-commons.yaml#/components/responses/Forbidden"
         400:
-          $ref: "#/components/responses/TestFdVError"
+          $ref: "./v1-commons.yaml#/components/responses/TestFdVError"
   /erp/testdriver/api/v1/communication/{id}:
     delete:
-      summary: "Operation to deletes a communication by id"
+      summary: "Operation to delete a communication by id"
       description: "UC: Nachrichten löschen
           https://github.com/gematik/api-erp/blob/master/docs/erp_communication.adoc#anwendungsfall-nachricht-als-apotheke-l%C3%B6schen"
       tags:
@@ -253,14 +266,117 @@ paths:
           required: true
           in: path
           schema:
-            $ref: "#/components/schemas/CommunicationId"
+            $ref: "./v1-communication.yaml#/components/schemas/CommunicationId"
       responses:
         204:
-          $ref: "#/components/responses/Successful"
+          $ref: "./v1-commons.yaml#/components/responses/Successful"
         403:
-          $ref: "#/components/responses/Forbidden"
+          $ref: "./v1-commons.yaml#/components/responses/Forbidden"
         400:
-          $ref: "#/components/responses/TestFdVError"
+          $ref: "./v1-commons.yaml#/components/responses/TestFdVError"
+  /erp/testdriver/api/v1/consent:
+    post:
+      summary: "Operation to create a consent for a patient by category"
+      tags:
+        - Consent
+        - EU-Prescription
+      parameters:
+        - in: query
+          name: category
+          required: true
+          schema:
+            $ref: "./v1-consent.yaml#/components/schemas/ConsentCategory"
+      responses:
+        201:
+          $ref: "./v1-consent.yaml#/components/responses/Consent"
+        403:
+          $ref: "./v1-commons.yaml#/components/responses/Forbidden"
+        400:
+          $ref: "./v1-commons.yaml#/components/responses/TestFdVError"
+    delete:
+      summary: "Operation to delete a consent for a patient by category"
+      tags:
+        - Consent
+        - EU-Prescription
+      parameters:
+        - in: query
+          name: category
+          required: true
+          schema:
+            $ref: "./v1-consent.yaml#/components/schemas/ConsentCategory"
+      responses:
+        204:
+          $ref: "./v1-commons.yaml#/components/responses/Successful"
+        403:
+          $ref: "./v1-commons.yaml#/components/responses/Forbidden"
+        400:
+          $ref: "./v1-commons.yaml#/components/responses/TestFdVError"
+    get:
+      summary: "Operation to retrieve a consent for a patient by category"
+      tags:
+        - Consent
+        - EU-Prescription
+      parameters:
+        - in: query
+          name: category
+          required: true
+          schema:
+            $ref: "./v1-consent.yaml#/components/schemas/ConsentCategory"
+      responses:
+        200:
+          $ref: "./v1-consent.yaml#/components/responses/Consent"
+        403:
+          $ref: "./v1-commons.yaml#/components/responses/Forbidden"
+        404:
+            description: "Consent not found for current patient and category"
+        400:
+          $ref: "./v1-commons.yaml#/components/responses/TestFdVError"
+  /erp/testdriver/api/v1/eu-access-authorization:
+    post:
+      summary: "Operation to grant a EU-AccessAuthorization for a country"
+      tags:
+        - EU-Prescription
+      parameters:
+        - in: query
+          name: country
+          required: true
+          schema:
+            $ref: "./v1-commons.yaml#/components/schemas/CountryIso3166"
+        - in: query
+          name: accessCode
+          description: "The Remote FdV have to generate the access code if no access code was delivered"
+          required: false
+          schema:
+            $ref: "./v1-prescription.yaml#/components/schemas/EU-AccessCode"
+      responses:
+        201:
+          $ref: "./v1-eu-prescription.yaml#/components/responses/EU-AccessAuthorization"
+        403:
+          $ref: "./v1-commons.yaml#/components/responses/Forbidden"
+        400:
+          $ref: "./v1-commons.yaml#/components/responses/TestFdVError"
+    delete:
+      summary: "Operation to revoke a EU-AccessAuthorization for a patient"
+      tags:
+        - EU-Prescription
+      responses:
+        204:
+          $ref: "./v1-commons.yaml#/components/responses/Successful"
+        403:
+          $ref: "./v1-commons.yaml#/components/responses/Forbidden"
+        400:
+          $ref: "./v1-commons.yaml#/components/responses/TestFdVError"
+    get:
+      summary: "Operation to retrieve a EU-AccessAuthorization for a patient"
+      tags:
+        - EU-Prescription
+      responses:
+        200:
+          $ref: "./v1-eu-prescription.yaml#/components/responses/EU-AccessAuthorization"
+        403:
+          $ref: "./v1-commons.yaml#/components/responses/Forbidden"
+        400:
+          $ref: "./v1-commons.yaml#/components/responses/TestFdVError"
 
 components:
   securitySchemes:
@@ -269,564 +385,6 @@ components:
       description: API key to authorize requests.
       name: apiKey
       in: header
-  requestBodies:
-    Login:
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/Kvid"
-    PrescriptionId:
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/PrescriptionId"
-    PharmacyAssignment:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              prescriptionId:
-                $ref: "#/components/schemas/PrescriptionId"
-              telematikId:
-                $ref: "#/components/schemas/TelematikId"
-              supplyOptionsType:
-                $ref: "#/components/schemas/SupplyOptionsType"
-            required:
-              - prescriptionId
-              - telematikId
 
-    2DCode:
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/PrescriptionId"
-  responses:
-    TestDriverError:
-      description: "Error processing the request with the test driver"
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              detail:
-                type: string
-                example: "Test-FdV is currently not running"
-    TestDriverInfo:
-      description: "Test driver interface is ready for use"
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/Info"
-    TestFdVError:
-      description: "The error is used to describe an OperationOutcome or a technical error, e.g. VAU encryption error"
-      content:
-        application/json:
-          schema:
-            oneOf:
-              - $ref: "#/components/schemas/OperationOutcome"
-              - $ref: "#/components/schemas/TechnicalError"
-    Successful:
-      description: "Operation was successful"
-    Login:
-      description: ""
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/LoginSuccess"
-    Forbidden:
-      description: "Forbidden - you are not allowed to do this"
-    Prescriptions:
-      description: "A list (max. 50 entries) of e-prescriptions, sorted in descending order by creation date"
-      content:
-        application/json:
-          schema:
-            type: array
-            items:
-              $ref: '#/components/schemas/Prescription'
-    Prescription:
-      description: "See https://github.com/gematik/api-erp/blob/master/docs/erp_versicherte.adoc#alle-e-prescriptione-ansehen"
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Prescription'
-    MedicationDispenses:
-      description: "A list (max. 50 entries) of medication dispenses, sorted in descending order by creation date"
-      content:
-        application/json:
-          schema:
-            type: array
-            items:
-              $ref: '#/components/schemas/MedicationDispense'
-    Pharmacies:
-      description: "A list (max. 50 entries) of pharmacies, sorted in order by name"
-      content:
-        application/json:
-          schema:
-            type: array
-            items:
-              $ref: '#/components/schemas/Pharmacy'
-    AuditEvents:
-      description: "A list (max. 50 entries) of audit events, sorted in descending order by creation date"
-      content:
-        application/json:
-          schema:
-            type: array
-            items:
-              $ref: '#/components/schemas/AuditEvent'
-    PharmacyAssignment:
-      description: ""
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Communication'
-    Communications:
-      description: ""
-      content:
-        application/json:
-          schema:
-            type: array
-            items:
-              $ref: '#/components/schemas/Communication'
-    2DCode:
-      description: "Image (PNG) encoded as base64 string"
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/2DCode'
-
-  schemas:
-    #Common
-    Info:
-      properties:
-        title:
-          type: string
-          description: "Title of the application"
-          example: "Test driver interface of ERP Test-FdV Module"
-        testDriverVersion:
-          type: string
-          description: "Version of the implemented test driver version"
-          example: "1.0.0"
-        startTime:
-          type: string
-          format: date-time
-          example: "2020-03-02T08:25:05+00:00"
-        testFdV:
-          $ref: "#/components/schemas/TestFdV"
-        testEnvironment:
-          $ref: "#/components/schemas/TestEnvironmentInfo"
-      required:
-        - testDriverVersion
-        - testEnvironment
-        - testFdV
-        - title
-        - startTime
-    TestFdV:
-      type: object
-      properties:
-        platform:
-          type: string
-          description: "Mobile Device Platform"
-          enum:
-            - Android
-            - iOS
-            - Huawei
-          example: "Android"
-        platformVersion:
-          type: string
-          example: "14.0.0"
-        isEmulated:
-          type: boolean
-          example: true
-        status:
-          description: "Current status of the test driver"
-          type: string
-          enum:
-            - running
-            - starting
-            - stopped
-          example: running
-        startTime:
-          type: string
-          format: date-time
-          example: "2020-03-02T08:25:05+00:00"
-      required:
-        - platform
-        - platformVersion
-        - isEmulated
-        - status
-        - startTime
-    LoginSuccess:
-      type: object
-      properties:
-        accessToken:
-          type: string
-          description: "IDP Token"
-          format: bearer
-      required:
-        - accessToken
-    OperationOutcome:
-      allOf:
-        - $ref: "#/components/schemas/Error"
-        - type: object
-          properties:
-            code:
-              type: string
-              enum:
-                - invalid
-                - unknown
-                - forbidden
-                - not_found
-                - not_supported
-                - conflict
-                - processing
-                - value
-                - transient
-              default: "processing"
-              description: "http status error type"
-            errorCode:
-              type: string
-              example: "1231273123"
-            diagnostics:
-              type: string
-              description: "additional details"
-              example: ""
-          required:
-            - code
-            - errorCode
-    TechnicalError:
-      $ref: "#/components/schemas/Error"
-    Error:
-      type: object
-      properties:
-        statusCode:
-          type: number
-          description: "Http StatusCode"
-          minimum: 300
-          maximum: 500
-          example: 401
-        details:
-          type: string
-          example: "Missing header field"
-          description: "Short Description of the error"
-      required:
-        - statusCode
-        - details
-    TestEnvironmentInfo:
-      description: "Information about the test environment that is used"
-      required:
-        - name
-        - serviceUrl
-      type: object
-      properties:
-        name:
-          type: string
-          enum:
-            - TU
-            - RU
-            - RU-DEV
-          example: "TU"
-        serviceUrl:
-          type: string
-          enum:
-            - "https://erp-test.app.ti-dienste.de"
-            - "https://erp-ref.app.ti-dienste.de"
-            - "https://erp-dev.app.ti-dienste.de"
-          description: "Service Endpoint"
-          example: "https://erp-test.app.ti-dienste.de"
-    QualificationType:
-      type: string
-      example: "Fach&#228;rztin f&#252;r Innere Medizin"
-    CommunicationId:
-      type: string
-      example: "79cc4c08-0e7b-4e52-acee-6ec7519ce67f"
-      format: uuid
-    #Practitioner
-    Practitioner:
-      type: object
-      properties:
-        name:
-          type: string
-        anr:
-          type: string
-        anrType:
-          type: string
-          enum:
-            - LANR
-            - ZANR
-        qualificationType:
-          $ref: "#/components/schemas/QualificationType"
-      required:
-        - name
-        - anr
-        - anrType
-        - qualificationType
-    # Patient
-    Kvid:
-      type: string
-      pattern: '^([A-Z])(\d{8})(\d)$'
-      example: "A000500015"
-    Patient:
-      type: object
-      properties:
-        name:
-          type: string
-          example: "Juliane Steinmeyer"
-        kvnr:
-          $ref: "#/components/schemas/Kvid"
-        insuranceType:
-          type: string
-          enum:
-            - GKV
-            - PKV
-      required:
-        - name
-        - kvnr
-        - insuranceType
-    # Pharmacy
-    Pharmacy:
-      type: object
-      properties:
-        name:
-          type: string
-          example: "Adlerapotheke"
-        address:
-          $ref: "#/components/schemas/Address"
-        position:
-          type: object
-          properties:
-            latitude:
-              type: number
-              example: 52.522575
-            longitude:
-              type: number
-              example: 13.387884
-          required:
-            - latitude
-            - longitude
-        telematikId:
-          $ref: "#/components/schemas/TelematikId"
-      required:
-        - name
-        - telematikId
-    Address:
-      type: object
-      properties:
-        city:
-          type: string
-          example: "Berlin"
-        street:
-          type: string
-          example: "Friedrichstr."
-        streetNr:
-          type: string
-          example: 136
-        zipcode:
-          type: number
-          example: 10117
-    TelematikId:
-      type: string
-      description: "https://gematik.de/fhir/sid/telematik-id"
-      example: "3-1.54.10123404"
-    # Prescription
-    Prescription:
-      type: object
-      description: "See https://gematik.de/fhir/erp/StructureDefinition/GEM_ERP_PR_Task"
-      properties:
-        prescriptionId:
-          $ref: '#/components/schemas/PrescriptionId'
-        accessCode:
-          $ref: '#/components/schemas/AccessCode'
-        workFlow:
-          $ref: '#/components/schemas/WorkFlow'
-        acceptDate:
-          $ref: '#/components/schemas/AcceptDate'
-        expiryDate:
-          $ref: '#/components/schemas/ExpiryDate'
-        authoredOn:
-          $ref: '#/components/schemas/AuthoredOn'
-        lastMedicationDispense:
-          $ref: '#/components/schemas/LastMedicationDispense'
-        status:
-          type: string
-          enum:
-            - ready
-            - in-progress
-            - cancelled
-            - completed
-        patient:
-          $ref: '#/components/schemas/Patient'
-        practitioner:
-          $ref: '#/components/schemas/Practitioner'
-        medication:
-          $ref: '#/components/schemas/Medication'
-      required:
-        - prescriptionId
-        - workFlow
-        - authoredOn
-        - status
-        - acceptDate
-        - expiryDate
-    PrescriptionId:
-      type: string
-      description: "See https://simplifier.net/e-prescription-workflow/gem_erp_pr_prescriptionid"
-      example: 160.000.000.000.123.76
-    AccessCode:
-      type: string
-      description: "See https://gematik.de/fhir/erp/NamingSystem/GEM_ERP_NS_AccessCode"
-      example: "c3830cacdc32d8b521dbfc02e5f7102f879f53206b5fca1d80fee3bda969ce4d"
-    WorkFlow:
-      type: string
-      description: "See https://gematik.de/fhir/erp/StructureDefinition/GEM_ERP_EX_PrescriptionType"
-      enum:
-        - "160"
-        - "169"
-        - "200"
-        - "209"
-      example: "160"
-    AcceptDate:
-      type: string
-      description: "See https://gematik.de/fhir/erp/StructureDefinition/GEM_ERP_EX_AcceptDate"
-      format: date
-      example: "2020-04-01"
-    ExpiryDate:
-      type: string
-      description: "See https://simplifier.net/e-prescription-workflow/gem_erp_ex_expirydate"
-      format: date
-      example: "2020-06-02"
-    AuthoredOn:
-      type: string
-      format: date-time
-      example: "2020-03-02T08:25:05+00:00"
-    LastMedicationDispense:
-      type: string
-      format: date-time
-      example: "2024-11-25T14:30:00+00:00"
-    # Medication
-    Medication:
-      type: object
-      properties:
-        type:
-          type: string
-          enum:
-            - freitext
-            - pzn
-            - rezeptur
-            - wirkstoff
-          example: "pzn"
-        code:
-          type: string
-          description: "Contains value for PZN, recipe, ingredient or a free text of a medication"
-          example: "Nerisona 30g, Asche Basis 60g"
-        isVaccine:
-          type: boolean
-      required:
-        - code
-        - type
-        - isVaccine
-    MedicationDispense:
-      description: "Reduced modeled by https://gematik.de/fhir/erp/StructureDefinition/GEM_ERP_PR_MedicationDispense"
-      type: object
-      properties:
-        prescriptionId:
-          $ref: '#/components/schemas/PrescriptionId'
-        medication:
-          $ref: '#/components/schemas/Medication'
-        pharmacist:
-          $ref: '#/components/schemas/TelematikId'
-        whenhandedover:
-          type: string
-          format: date
-          example: "2020-03-20"
-      required:
-        - prescriptionId
-        - medication
-        - pharmacist
-        - whenhandedover
-    # AuditEvent
-    AuditEvent:
-      description: "Reduced modeled by https://gematik.de/fhir/erp/StructureDefinition/GEM_ERP_PR_AuditEvent"
-      properties:
-        text:
-          type: string
-          example: "Juliane Steinmeyer hat eine Liste von E-Rezepten heruntergeladen"
-        recorded:
-          type: string
-          format: date-time
-          example: "2024-11-25T14:30:00+00:00"
-        prescriptionId:
-          $ref: '#/components/schemas/PrescriptionId'
-        action:
-          type: string
-          enum: ["C", "R", "U", "D", "E"]
-          example: "R"
-        who:
-          type: string
-          description: "Agent that triggered this event"
-          oneOf:
-            - $ref: '#/components/schemas/Kvid'
-            - $ref: '#/components/schemas/TelematikId'
-            - $ref: '#/components/schemas/System'
-      required:
-        - text
-        - recorded
-        - prescriptionId
-        - action
-        - who
-    # Communication
-    Communication:
-      description: "See https://gematik.de/fhir/erp/StructureDefinition/GEM_ERP_PR_Communication_InfoReq
-      See https://gematik.de/fhir/erp/StructureDefinition/GEM_ERP_PR_Communication_DispReq
-      See https://gematik.de/fhir/erp/StructureDefinition/GEM_ERP_PR_Communication_Reply"
-      type: object
-      properties:
-        id:
-          $ref: '#/components/schemas/CommunicationId'
-        type:
-          type: string
-          enum:
-            - DispReq
-            - InfoReq
-            - Reply
-            - Representative
-          example: DispReq
-        reference:
-          $ref: '#/components/schemas/PrescriptionId'
-        sender:
-          oneOf:
-            - $ref: '#/components/schemas/TelematikId'
-            - $ref: '#/components/schemas/Kvid'
-        recipient:
-          oneOf:
-            - $ref: '#/components/schemas/TelematikId'
-            - $ref: '#/components/schemas/Kvid'
-        sent:
-          type: string
-          format: date-time
-          example: "2020-03-12T18:01:10+00:00"
-        supplyOptionsType:
-          $ref: '#/components/schemas/SupplyOptionsType'
-      required:
-        - type
-        - sender
-        - recipient
-        - sent
-
-    SupplyOptionsType:
-      type: string
-      enum: [ "delivery", "shipment", "onPremise" ]
-      example: "delivery"
-    2DCode:
-      type: string
-      format: byte
-      description: "Image (PNG) encoded as base64 string"
-    System:
-      type: string
-      enum: [ "ERP-FD", "Exporter" ]
-      example: "ERP-FD"
 security:
   - apiKey: []

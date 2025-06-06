@@ -1,0 +1,23 @@
+components:
+  schemas:
+    Kvid:
+      type: string
+      pattern: '^([A-Z])(\d{8})(\d)$'
+      example: "A000500015"
+    Patient:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Juliane Steinmeyer"
+        kvnr:
+          $ref: "#/components/schemas/Kvid"
+        insuranceType:
+          type: string
+          enum:
+            - GKV
+            - PKV
+      required:
+        - name
+        - kvnr
+        - insuranceType
