@@ -12,6 +12,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * *******
+ *
+ * For additional notes and disclaimer from gematik and in case of changes by gematik find details in the "Readme" file.
  */
 
 package de.gematik.test.erezept.remotefdv.server.webservice.mapping;
@@ -26,13 +30,13 @@ import de.gematik.test.erezept.fhir.resources.erp.ErxMedicationDispense;
 import de.gematik.test.erezept.fhir.resources.erp.GemErpMedication;
 import de.gematik.test.erezept.fhir.values.PZN;
 import de.gematik.test.erezept.remotefdv.server.mapping.MedicationDispenseDataMapper;
-
 import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.val;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.MedicationDispense;
 import org.junit.jupiter.api.Test;
 
 class MedicationDispenseDataMapperTest {
@@ -47,10 +51,12 @@ class MedicationDispenseDataMapperTest {
     when(erxMedDispense.getPrescriptionId()).thenReturn(fakerPrescriptionId());
     when(erxMedDispense.getWhenHandedOver()).thenReturn(new Date());
     when(erxMedDispense.getPerformerIdFirstRep()).thenReturn(fakerTelematikId());
+    when(erxMedDispense.getPerformerFirstRep())
+        .thenReturn(new MedicationDispense.MedicationDispensePerformerComponent());
     val cc = mock(CodeableConcept.class);
     when(cc.getText()).thenReturn("Nerisona 30g, Asche Basis 60g");
     when(gemErpMedication.getCode()).thenReturn(cc);
     Pair<ErxMedicationDispense, GemErpMedication> pair = Pair.of(erxMedDispense, gemErpMedication);
-    val r = assertDoesNotThrow(() -> MedicationDispenseDataMapper.fromGemErpMedication(pair));
+    assertDoesNotThrow(() -> MedicationDispenseDataMapper.fromGemErpMedication(pair));
   }
 }

@@ -1,0 +1,79 @@
+components:
+  requestBodies:
+    PharmacyAssignment:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              prescriptionId:
+                $ref: "./v1-prescription.yaml#/components/schemas/PrescriptionId"
+              telematikId:
+                $ref: "./v1-healthcare-providers.yaml#/components/schemas/TelematikId"
+              supplyOptionsType:
+                $ref: "#/components/schemas/SupplyOptionsType"
+            required:
+              - prescriptionId
+              - telematikId
+  responses:
+    Communications:
+      description: ""
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Communication'
+    PharmacyAssignment:
+      description: ""
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Communication'
+  schemas:
+    CommunicationId:
+      type: string
+      example: "79cc4c08-0e7b-4e52-acee-6ec7519ce67f"
+      format: uuid
+    Communication:
+      description: "See https://gematik.de/fhir/erp/StructureDefinition/GEM_ERP_PR_Communication_InfoReq
+      See https://gematik.de/fhir/erp/StructureDefinition/GEM_ERP_PR_Communication_DispReq
+      See https://gematik.de/fhir/erp/StructureDefinition/GEM_ERP_PR_Communication_Reply"
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/CommunicationId'
+        type:
+          type: string
+          enum:
+            - DispReq
+            - InfoReq
+            - Reply
+            - Representative
+          example: DispReq
+        reference:
+          $ref: './v1-prescription.yaml#/components/schemas/PrescriptionId'
+        sender:
+          oneOf:
+            - $ref: './v1-healthcare-providers.yaml#/components/schemas/TelematikId'
+            - $ref: './v1-patient.yaml#/components/schemas/Kvid'
+        recipient:
+          oneOf:
+            - $ref: './v1-healthcare-providers.yaml#/components/schemas/TelematikId'
+            - $ref: './v1-patient.yaml#/components/schemas/Kvid'
+        sent:
+          type: string
+          format: date-time
+          example: "2020-03-12T18:01:10+00:00"
+        supplyOptionsType:
+          $ref: '#/components/schemas/SupplyOptionsType'
+      required:
+        - type
+        - sender
+        - recipient
+        - sent
+    SupplyOptionsType:
+      type: string
+      enum: [ "delivery", "shipment", "onPremise" ]
+      example: "delivery"

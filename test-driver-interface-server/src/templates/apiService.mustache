@@ -14,6 +14,9 @@ import org.openapitools.model.LoginSuccess;
 import org.openapitools.model.MedicationDispense;
 import org.openapitools.model.Pharmacy;
 import org.openapitools.model.Prescription;
+import org.openapitools.model.ConsentCategory;
+import org.openapitools.model.EUAccessAuthorization;
+import org.openapitools.model.ErpTestdriverApiV1PrescriptionIdPatchRequest;
 
 import java.util.List;
 import org.openapitools.api.NotFoundException;
@@ -40,4 +43,12 @@ public abstract Response erpTestdriverApiV1PrescriptionIdDelete(String id,Securi
 public abstract Response erpTestdriverApiV1PrescriptionIdGet(String id,SecurityContext securityContext) throws NotFoundException;
 public abstract Response erpTestdriverApiV1StartPut(SecurityContext securityContext) throws NotFoundException;
 public abstract Response erpTestdriverApiV1StopPut(SecurityContext securityContext) throws NotFoundException;
+public abstract Response erpTestdriverApiV1ConsentPost(ConsentCategory category, SecurityContext securityContext) throws NotFoundException;
+public abstract Response erpTestdriverApiV1ConsentDelete(ConsentCategory category, SecurityContext securityContext) throws NotFoundException;
+public abstract Response erpTestdriverApiV1ConsentGet(ConsentCategory category, SecurityContext securityContext) throws NotFoundException;
+public abstract Response erpTestdriverApiV1EuAccessAuthorizationPost(String country, String accessCode, SecurityContext securityContext) throws NotFoundException;
+public abstract Response erpTestdriverApiV1EuAccessAuthorizationDelete(SecurityContext securityContext) throws NotFoundException;
+public abstract Response erpTestdriverApiV1EuAccessAuthorizationGet(SecurityContext securityContext) throws NotFoundException;
+public abstract Response erpTestdriverApiV1PrescriptionIdPatch(String id, ErpTestdriverApiV1PrescriptionIdPatchRequest patchRequest, SecurityContext securityContext) throws NotFoundException;
+
 }

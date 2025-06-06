@@ -12,6 +12,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * *******
+ *
+ * For additional notes and disclaimer from gematik and in case of changes by gematik find details in the "Readme" file.
  */
 
 package de.gematik.test.erezept.remotefdv.server.config;
@@ -25,8 +29,11 @@ import de.gematik.test.erezept.config.dto.actor.PatientConfiguration;
 import de.gematik.test.erezept.config.dto.erpclient.EnvironmentConfiguration;
 import de.gematik.test.erezept.config.dto.primsys.PrimsysConfigurationDto;
 import de.gematik.test.erezept.remotefdv.server.actors.Patient;
+import de.gematik.test.erezept.remotefdv.server.exceptions.NoSuchEnvironmentException;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
+@Slf4j
 public class MyConfigurationFactory extends ConfiguredFactory {
   private final PrimsysConfigurationDto dto;
   private final SmartcardArchive sca = SmartcardArchive.fromResources();
@@ -47,10 +54,12 @@ public class MyConfigurationFactory extends ConfiguredFactory {
   }
 
   public EnvironmentConfiguration getActiveEnvConfig() {
+    val activeEnv = System.getenv().getOrDefault("TI_ENV", dto.getActiveEnvironment());
+    log.info("Active Environment: " + activeEnv);
     return dto.getEnvironments().stream()
-        .filter(e -> e.getName().equals(dto.getActiveEnvironment()))
+        .filter(e -> e.getName().equalsIgnoreCase(activeEnv))
         .findAny()
-        .orElseThrow();
+        .orElseThrow(() -> new NoSuchEnvironmentException(activeEnv));
   }
 
   public Egk getEgkByKvnr(String kvnr) {

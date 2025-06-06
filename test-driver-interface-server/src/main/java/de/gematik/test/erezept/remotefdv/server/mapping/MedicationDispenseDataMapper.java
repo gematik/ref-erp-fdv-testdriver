@@ -12,6 +12,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * *******
+ *
+ * For additional notes and disclaimer from gematik and in case of changes by gematik find details in the "Readme" file.
  */
 
 package de.gematik.test.erezept.remotefdv.server.mapping;
@@ -19,15 +23,15 @@ package de.gematik.test.erezept.remotefdv.server.mapping;
 import de.gematik.test.erezept.fhir.resources.erp.ErxMedicationDispense;
 import de.gematik.test.erezept.fhir.resources.erp.GemErpMedication;
 import de.gematik.test.erezept.fhir.resources.kbv.KbvErpMedication;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.val;
 import org.apache.commons.lang3.tuple.Pair;
 import org.openapitools.model.Medication;
 import org.openapitools.model.MedicationDispense;
-
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
+import org.openapitools.model.Pharmacist;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class MedicationDispenseDataMapper {
@@ -64,10 +68,13 @@ public class MedicationDispenseDataMapper {
     val medDispense = new MedicationDispense();
     val instant = erxMedDispense.getWhenHandedOver().toInstant();
     val odt = instant.atOffset(ZoneOffset.UTC);
-    val whenHandedOverUTC =odt.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+    val whenHandedOverUTC = odt.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+    val pharmacist = new Pharmacist();
+    pharmacist.setName(erxMedDispense.getPerformerFirstRep().toString());
+    pharmacist.setIdentifier(erxMedDispense.getPerformerIdFirstRep());
     medDispense.setWhenhandedover(whenHandedOverUTC);
     medDispense.setPrescriptionId(erxMedDispense.getPrescriptionId().getValue());
-    medDispense.setPharmacist(erxMedDispense.getPerformerIdFirstRep());
+    medDispense.setPharmacist(pharmacist);
     medDispense.setMedication(medication);
     return medDispense;
   }

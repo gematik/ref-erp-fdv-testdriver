@@ -1,0 +1,41 @@
+components:
+  requestBodies:
+    EU-RedeemableByPatient:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              euRedeemableByPatient:
+                $ref: "#/components/schemas/EU-RedeemableByPatient"
+            required:
+              - euRedeemableByPatient
+  responses:
+    EU-AccessAuthorization:
+      description: "A access authorization for a country"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/EU-AccessAuthorization"
+  schemas:
+    EU-AccessAuthorization:
+      type: object
+      properties:
+        country:
+          $ref: "./v1-commons.yaml#/components/schemas/CountryIso3166"
+        accessCode:
+          $ref: "./v1-prescription.yaml#/components/schemas/EU-AccessCode"
+        validUntil:
+          type: string
+          format: date-time
+          example: "2025-10-01T16:29:00.434+00:00"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-10-01T15:29:00.434+00:00"
+    EU-RedeemableByPatient:
+      description: "true, if an e-prescription has been marked by patient for redemption in another EU country"
+      type: boolean
+      example: false
+

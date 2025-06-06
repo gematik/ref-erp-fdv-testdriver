@@ -12,18 +12,21 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * *******
+ *
+ * For additional notes and disclaimer from gematik and in case of changes by gematik find details in the "Readme" file.
  */
 
 package de.gematik.test.erezept.remotefdv.server.mapping;
 
 import de.gematik.test.erezept.fhir.resources.erp.ErxTask;
 import de.gematik.test.erezept.fhir.resources.kbv.KbvErpBundle;
-import lombok.val;
-import org.openapitools.model.*;
-
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import lombok.val;
+import org.openapitools.model.*;
 
 public class PrescriptionDataMapper {
   private PrescriptionDataMapper() {
@@ -81,7 +84,8 @@ public class PrescriptionDataMapper {
     prescription.setStatus(Prescription.StatusEnum.fromValue(task.getStatus().toCode()));
     prescription.setWorkFlow(WorkFlow.fromValue(task.getFlowType().getCode()));
   }
-  private static String formatToUTC(Date date){
+
+  private static String formatToUTC(Date date) {
     val instant = date.toInstant();
     val odt = instant.atOffset(ZoneOffset.UTC);
     return odt.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);

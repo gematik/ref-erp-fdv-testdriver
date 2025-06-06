@@ -12,17 +12,20 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * *******
+ *
+ * For additional notes and disclaimer from gematik and in case of changes by gematik find details in the "Readme" file.
  */
 
 package de.gematik.test.erezept.remotefdv.server.mapping;
 
 import de.gematik.test.erezept.fhir.resources.erp.ErxCommunication;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import lombok.val;
 import org.openapitools.model.Communication;
 import org.openapitools.model.SupplyOptionsType;
-
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 
 public class CommunicationDataMapper {
   private CommunicationDataMapper() {
@@ -38,7 +41,7 @@ public class CommunicationDataMapper {
     com.setRecipient(resource.getRecipientId());
     val instant = resource.getSent().toInstant();
     val odt = instant.atOffset(ZoneOffset.UTC);
-    val sentUTC =odt.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+    val sentUTC = odt.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
     com.setSent(sentUTC);
     SupplyOptionsType supplyOptionsType = SupplyOptionsType.DELIVERY;
     if (resource.getMessage().contains("onPremise")) {
