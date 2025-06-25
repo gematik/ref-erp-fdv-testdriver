@@ -6,7 +6,7 @@
 
     <artifactId>erp-fdv-test-driver-interface</artifactId>
     <groupId>de.gematik.erezept.remotefdv</groupId>
-    <version>1.0.7</version>
+    <version>1.0.8</version>
     <packaging>pom</packaging>
     <name>Test Driver Interface Parent</name>
     <description>This module contains TDI Client and TDI Data</description>
@@ -24,6 +24,14 @@
         <swagger-core-version>2.2.11</swagger-core-version>
         <erp.testsuite.version>0.12.0</erp.testsuite.version>
         <version.spotless>2.41.1</version.spotless>
+        <central-publishing-maven-plugin.version>0.7.0</central-publishing-maven-plugin.version>
+        <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
+        <maven-javadoc-plugin.version>3.11.2</maven-javadoc-plugin.version>
+        <maven-gpg-plugin.version>3.2.7</maven-gpg-plugin.version>
+        <jacoco-maven-plugin.version>0.8.11</jacoco-maven-plugin.version>
+
+
+
     </properties>
     <dependencies>
         <dependency>
@@ -65,7 +73,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.10</version>
+                <version>${jacoco-maven-plugin.version}</version>
                 <executions>
                     <execution>
                         <id>prepare-agent</id>
@@ -116,18 +124,18 @@
         </plugins>
     </build>
 
-    <url>https://github.com/gematik/lib-bbriccs</url>
+    <url>https://github.com/gematik/ref-erp-fdv-testdriver</url>
 
     <scm>
-        <url>https://github.com/gematik/lib-bbriccs</url>
-        <connection>scm:git:git://github.com/gematik/lib-bbriccs.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com:gematik/lib-bbriccs.git
+        <url>https://github.com/gematik/ref-erp-fdv-testdriver</url>
+        <connection>scm:git:git://github.com/gematik/ref-erp-fdv-testdriver.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com:gematik/ref-erp-fdv-testdriver.git
         </developerConnection>
     </scm>
 
     <issueManagement>
         <system>GitHub</system>
-        <url>https://github.com/gematik/lib-bbriccs/issues</url>
+        <url>https://github.com/gematik/ref-erp-fdv-testdriver/issues</url>
     </issueManagement>
 
     <organization>
@@ -161,7 +169,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>3.2.4</version>
+                        <version>${maven-gpg-plugin.version}</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
@@ -179,21 +187,19 @@
                         </executions>
                     </plugin>
                     <plugin>
-                        <groupId>org.sonatype.plugins</groupId>
-                        <artifactId>nexus-staging-maven-plugin</artifactId>
-                        <version>1.7.0</version>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>${central-publishing-maven-plugin.version}</version>
                         <extensions>true</extensions>
                         <configuration>
-                            <serverId>ossrh</serverId>
-                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                            <autoReleaseAfterClose>true</autoReleaseAfterClose>
-                            <stagingProgressTimeoutMinutes>20</stagingProgressTimeoutMinutes>
+                            <publishingServerId>central</publishingServerId>
+                            <autoPublish>true</autoPublish>
                         </configuration>
                     </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-source-plugin</artifactId>
-                        <version>3.3.0</version>
+                        <version>${maven-source-plugin.version}</version>
                         <executions>
                             <execution>
                                 <id>attach-sources</id>
@@ -206,7 +212,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>3.10.0</version>
+                        <version>${maven-javadoc-plugin.version}</version>
                         <configuration>
                             <doclint>none</doclint>
                         </configuration>
