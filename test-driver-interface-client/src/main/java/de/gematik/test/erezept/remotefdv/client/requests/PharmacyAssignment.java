@@ -26,7 +26,7 @@ import java.util.List;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
-import org.openapitools.model.Communication;
+import de.gematik.erezept.remotefdv.api.model.Communication;
 
 @RequiredArgsConstructor
 public class PharmacyAssignment implements PatientRequests<Communication> {

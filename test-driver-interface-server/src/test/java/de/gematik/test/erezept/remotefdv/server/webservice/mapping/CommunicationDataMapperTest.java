@@ -41,7 +41,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.openapitools.model.SupplyOptionsType;
+import de.gematik.erezept.remotefdv.api.model.SupplyOptionsType;
 
 class CommunicationDataMapperTest {
   private ErxCommunication erxCommunication;

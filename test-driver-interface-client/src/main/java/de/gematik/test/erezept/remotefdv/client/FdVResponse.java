@@ -25,7 +25,7 @@ import java.util.Optional;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.val;
-import org.openapitools.model.Error;
+import de.gematik.erezept.remotefdv.api.model.Error;
 
 @Getter
 @Setter

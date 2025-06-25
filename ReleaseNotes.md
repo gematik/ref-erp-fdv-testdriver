@@ -1,5 +1,14 @@
 # Release Notes ERP FdV Test Driver Interface
 
+## Release 1.0.7
+
+* test-driver-interface-data:
+  - renamed package for generated classes to de.gematik.test.erezept.remotefdv.api.model
+* test-driver-interface-server:
+  - renamed package for generated classes to de.gematik.test.erezept.remotefdv.api.api
+
+  
+
 ## Release 1.0.6
 
 * openapi:

@@ -23,7 +23,7 @@ package de.gematik.test.erezept.remotefdv.server.factories;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import org.junit.jupiter.api.Test;
-import org.openapitools.api.factories.ErpApiServiceFactory;
+import de.gematik.erezept.remotefdv.api.api.factories.ErpApiServiceFactory;
 
 class ErpApiServiceFactoryTest {
   @Test

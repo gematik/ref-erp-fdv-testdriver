@@ -26,7 +26,7 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import lombok.val;
-import org.openapitools.model.*;
+import de.gematik.erezept.remotefdv.api.model.*;
 
 public class PrescriptionDataMapper {
   private PrescriptionDataMapper() {

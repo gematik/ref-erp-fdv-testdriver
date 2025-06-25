@@ -24,7 +24,7 @@ import de.gematik.test.erezept.fhir.resources.erp.ErxAuditEvent;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import lombok.val;
-import org.openapitools.model.AuditEvent;
+import de.gematik.erezept.remotefdv.api.model.AuditEvent;
 
 public class AuditEventDataMapper {
   private AuditEventDataMapper() {
