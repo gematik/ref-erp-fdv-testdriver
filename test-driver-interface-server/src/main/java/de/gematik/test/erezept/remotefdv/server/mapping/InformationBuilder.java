@@ -20,8 +20,8 @@
 
 package de.gematik.test.erezept.remotefdv.server.mapping;
 
-import org.openapitools.model.Info;
-import org.openapitools.model.TestFdV;
+import de.gematik.erezept.remotefdv.api.model.Info;
+import de.gematik.erezept.remotefdv.api.model.TestFdV;
 
 public class InformationBuilder {
   private InformationBuilder() {

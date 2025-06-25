@@ -6,7 +6,7 @@
     <parent>
         <groupId>de.gematik.erezept.remotefdv</groupId>
         <artifactId>erp-fdv-test-driver-interface</artifactId>
-        <version>1.0.6</version>
+        <version>1.0.7</version>
     </parent>
 
     <artifactId>test-driver-interface-data</artifactId>
@@ -35,8 +35,8 @@
                             <inputSpec>openapi/src/main/resources/ErpTestDriver.yaml</inputSpec>
                             <generatorName>jaxrs-jersey</generatorName>
                             <output>${project.build.directory}/generated-sources</output>
-                            <apiPackage>org.openapitools.api</apiPackage>
-                            <modelPackage>org.openapitools.model</modelPackage>
+                            <apiPackage>de.gematik.erezept.remotefdv.api.api</apiPackage>
+                            <modelPackage>de.gematik.erezept.remotefdv.api.model</modelPackage>
                             <generateApis>false</generateApis>
                             <generateSupportingFiles>false</generateSupportingFiles>
                             <typeMappings>UUID=String,CommunicationSender=String,CommunicationReference=String,Date=String,NameEnum=String,ServiceUrlEnum=String,PharmacistIdentifier=String

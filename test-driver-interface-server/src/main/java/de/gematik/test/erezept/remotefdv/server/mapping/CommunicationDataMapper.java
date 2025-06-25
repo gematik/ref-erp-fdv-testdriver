@@ -24,8 +24,8 @@ import de.gematik.test.erezept.fhir.resources.erp.ErxCommunication;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import lombok.val;
-import org.openapitools.model.Communication;
-import org.openapitools.model.SupplyOptionsType;
+import de.gematik.erezept.remotefdv.api.model.Communication;
+import de.gematik.erezept.remotefdv.api.model.SupplyOptionsType;
 
 public class CommunicationDataMapper {
   private CommunicationDataMapper() {

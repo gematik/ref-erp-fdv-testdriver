@@ -25,7 +25,7 @@ import de.gematik.test.erezept.remotefdv.client.HttpRequestInfo;
 import java.util.List;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.openapitools.model.Communication;
+import de.gematik.erezept.remotefdv.api.model.Communication;
 
 @Getter
 @RequiredArgsConstructor

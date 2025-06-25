@@ -29,9 +29,9 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.val;
 import org.apache.commons.lang3.tuple.Pair;
-import org.openapitools.model.Medication;
-import org.openapitools.model.MedicationDispense;
-import org.openapitools.model.Pharmacist;
+import de.gematik.erezept.remotefdv.api.model.Medication;
+import de.gematik.erezept.remotefdv.api.model.MedicationDispense;
+import de.gematik.erezept.remotefdv.api.model.Pharmacist;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class MedicationDispenseDataMapper {

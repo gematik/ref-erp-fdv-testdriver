@@ -57,10 +57,10 @@ import kong.unirest.core.json.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.NotImplementedException;
-import org.openapitools.api.ApiResponseMessage;
-import org.openapitools.api.ErpApiService;
-import org.openapitools.api.NotFoundException;
-import org.openapitools.model.*;
+import de.gematik.erezept.remotefdv.api.api.ApiResponseMessage;
+import de.gematik.erezept.remotefdv.api.api.ErpApiService;
+import de.gematik.erezept.remotefdv.api.api.NotFoundException;
+import de.gematik.erezept.remotefdv.api.model.*;
 
 @Slf4j
 @javax.annotation.Generated(
