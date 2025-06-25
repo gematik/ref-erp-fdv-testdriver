@@ -6,7 +6,7 @@
     <parent>
         <groupId>de.gematik.erezept.remotefdv</groupId>
         <artifactId>erp-fdv-test-driver-interface</artifactId>
-        <version>1.0.7</version>
+        <version>1.0.8</version>
     </parent>
 
     <artifactId>openapi</artifactId>

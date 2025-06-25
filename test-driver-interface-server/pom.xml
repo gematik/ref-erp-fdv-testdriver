@@ -5,14 +5,14 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>test-driver-interface-server</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.7</version>
+    <version>1.0.8</version>
     <name>Test Driver Interface Server</name>
     <description>Mock Implementation of OpenAPI</description>
 
     <parent>
         <groupId>de.gematik.erezept.remotefdv</groupId>
         <artifactId>erp-fdv-test-driver-interface</artifactId>
-        <version>1.0.7</version>
+        <version>1.0.8</version>
     </parent>
 
     <profiles>
@@ -107,7 +107,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.11.0</version>
+                <version>${maven-compiler-plugin.version}</version>
                 <configuration>
                     <source>${maven.compiler.source}</source>
                     <target>${maven.compiler.target}</target>
@@ -347,7 +347,7 @@
         <dependency>
             <groupId>de.gematik.erezept.remotefdv</groupId>
             <artifactId>test-driver-interface-data</artifactId>
-            <version>1.0.7</version>
+            <version>1.0.8</version>
         </dependency>
         <dependency>
             <groupId>io.swagger</groupId>
@@ -374,6 +374,7 @@
         <java.version>17</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
+        <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
         <swagger-core-version>2.0.0</swagger-core-version>
         <jersey2-version>2.34</jersey2-version>
         <jetty2-version>9.4.54.v20240208</jetty2-version>
