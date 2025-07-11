@@ -1,5 +1,12 @@
 # Release Notes ERP FdV Test Driver Interface
 
+## Release 1.0.9
+
+* openapi 
+  - refactor the module to keep older versions of the OpenAPI for more clarity
+
+
+  
 ## Release 1.0.8
 
 * test-driver-interface-data:
