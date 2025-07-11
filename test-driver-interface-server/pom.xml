@@ -5,14 +5,14 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>test-driver-interface-server</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.8</version>
+    <version>1.0.9</version>
     <name>Test Driver Interface Server</name>
     <description>Mock Implementation of OpenAPI</description>
 
     <parent>
         <groupId>de.gematik.erezept.remotefdv</groupId>
         <artifactId>erp-fdv-test-driver-interface</artifactId>
-        <version>1.0.8</version>
+        <version>1.0.9</version>
     </parent>
 
     <profiles>
@@ -136,7 +136,7 @@
                         </goals>
                         <configuration>
                             <templateDirectory>${project.basedir}/src/templates</templateDirectory>
-                            <inputSpec>openapi/src/main/resources/ErpTestDriver.yaml</inputSpec>
+                            <inputSpec>openapi/v2.0.0/ErpTestDriver.yaml</inputSpec>
                             <generatorName>jaxrs-jersey</generatorName>
                             <output>${project.build.directory}/generated-sources</output>
                             <apiPackage>de.gematik.erezept.remotefdv.api.api</apiPackage>
@@ -347,7 +347,7 @@
         <dependency>
             <groupId>de.gematik.erezept.remotefdv</groupId>
             <artifactId>test-driver-interface-data</artifactId>
-            <version>1.0.8</version>
+            <version>1.0.9</version>
         </dependency>
         <dependency>
             <groupId>io.swagger</groupId>
