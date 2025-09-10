@@ -22,4 +22,7 @@ CI
 *.pcs
 **/nginx.conf
 **/.env
+/test-driver-interface-server/smartcards-fdv/egk/
+/test-driver-interface-server/smartcards-fdv/egk
+test-driver-interface-server/smartcards-fdv/egk
 

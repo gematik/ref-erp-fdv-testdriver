@@ -25,14 +25,15 @@
 FROM eclipse-temurin:17-jdk
 # Create a non-privileged user that the app will run under.
 # See https://docs.docker.com/go/dockerfile-user-best-practices/
+WORKDIR /app
 ARG UID=10001
 ARG COMMIT_HASH
 ARG VERSION
 ARG BUILD_DATE
 
-ARG USER=primsys
-ARG GROUP=primsys
-ARG USER_HOME=/home/$USER
+ARG USER=tdi_server
+ARG GROUP=tdi_server
+#ARG USER_HOME=/home/$USER
 ARG GID=23456
 
 RUN adduser \
@@ -48,15 +49,17 @@ USER appuser
 # Copy the executable from the "package" stage.
 #COPY --from=package build/target/app.jar app.jar
 #COPY ./target/ app.jar
-COPY target/tdi-server-jar-with-dependencies.jar/ app.jar
+COPY target/tdi-server-jar-with-dependencies.jar app.jar
 COPY src/main/webapp webapp/
-COPY src/main/java/de/gematik/test/erezept/remotefdv/server/config/config.yaml app/config.yaml
-COPY src/main/java/de/gematik/test/erezept/remotefdv/server/config/secret.ppcs app/secret.ppcs
+COPY src/main/java/de/gematik/test/erezept/remotefdv/server/config/config.yaml config.yaml
+COPY src/main/java/de/gematik/test/erezept/remotefdv/server/config/secret.ppcs secret.ppcs
+COPY smartcards-fdv smartcards/
 
 ENV HTTP_PROXY=""
 ENV HTTPS_PROXY=""
-ENV WEBAPP=webapp
-ENV CONFIG_PATH=app/config.yaml
+ENV WEBAPP=/app/webapp
+ENV CONFIG_PATH=/app/config.yaml
+ENV SMARTCARDS_CONFIG_PATH=/app/smartcards
 #Environment where RemoteFdV Server should be started. Is overwritten by Jenkins pipeline
 ENV TI_ENV=RU
 

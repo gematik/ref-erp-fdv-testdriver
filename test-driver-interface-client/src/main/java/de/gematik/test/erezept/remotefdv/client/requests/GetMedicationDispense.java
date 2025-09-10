@@ -21,11 +21,11 @@
 package de.gematik.test.erezept.remotefdv.client.requests;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import de.gematik.erezept.remotefdv.api.model.MedicationDispense;
 import de.gematik.test.erezept.remotefdv.client.HttpRequestInfo;
 import java.util.List;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import de.gematik.erezept.remotefdv.api.model.MedicationDispense;
 
 @RequiredArgsConstructor
 public class GetMedicationDispense implements PatientRequests<MedicationDispense> {
@@ -39,6 +39,6 @@ public class GetMedicationDispense implements PatientRequests<MedicationDispense
   public void finalizeRequest(HttpRequestInfo rb) {
     rb.setResource("medicationdispense");
     rb.setMethod("GET");
-    rb.setQuery("whenhandedover", whenHandedOver);
+    rb.setParameters("whenhandedover", whenHandedOver);
   }
 }

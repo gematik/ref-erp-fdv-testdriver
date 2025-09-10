@@ -36,7 +36,12 @@ import lombok.val;
 @Slf4j
 public class MyConfigurationFactory extends ConfiguredFactory {
   private final PrimsysConfigurationDto dto;
-  private final SmartcardArchive sca = SmartcardArchive.fromResources();
+  private final String path =
+      System.getenv()
+          .getOrDefault(
+              "SMARTCARDS_CONFIG_PATH",
+              System.getProperty("user.dir") + "/test-driver-interface-server/smartcards-fdv");
+  private final SmartcardArchive sca = SmartcardArchive.from(path);
 
   public MyConfigurationFactory(PrimsysConfigurationDto dto) {
     this.dto = dto;
@@ -55,7 +60,6 @@ public class MyConfigurationFactory extends ConfiguredFactory {
 
   public EnvironmentConfiguration getActiveEnvConfig() {
     val activeEnv = System.getenv().getOrDefault("TI_ENV", dto.getActiveEnvironment());
-    log.info("Active Environment: " + activeEnv);
     return dto.getEnvironments().stream()
         .filter(e -> e.getName().equalsIgnoreCase(activeEnv))
         .findAny()

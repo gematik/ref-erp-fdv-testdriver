@@ -6,7 +6,7 @@
 
     <artifactId>erp-fdv-test-driver-interface</artifactId>
     <groupId>de.gematik.erezept.remotefdv</groupId>
-    <version>1.0.9</version>
+    <version>1.1.0</version>
     <packaging>pom</packaging>
     <name>Test Driver Interface Parent</name>
     <description>This module contains TDI Client and TDI Data</description>
@@ -22,7 +22,7 @@
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <swagger-core-version>2.2.11</swagger-core-version>
-        <erp.testsuite.version>0.12.0</erp.testsuite.version>
+        <erp.testsuite.version>1.1.0-SNAPSHOT</erp.testsuite.version>
         <version.spotless>2.41.1</version.spotless>
         <central-publishing-maven-plugin.version>0.7.0</central-publishing-maven-plugin.version>
         <maven-source-plugin.version>3.3.1</maven-source-plugin.version>

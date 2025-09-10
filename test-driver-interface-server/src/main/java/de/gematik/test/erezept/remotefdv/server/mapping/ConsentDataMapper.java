@@ -18,23 +18,23 @@
  * For additional notes and disclaimer from gematik and in case of changes by gematik find details in the "Readme" file.
  */
 
-package de.gematik.test.erezept.remotefdv.server.webservice.config;
+package de.gematik.test.erezept.remotefdv.server.mapping;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-
-import de.gematik.test.erezept.remotefdv.server.config.TestFdVFactory;
+import de.gematik.erezept.remotefdv.api.model.Consent;
+import de.gematik.erezept.remotefdv.api.model.ConsentCategory;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.val;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 
-class TestFdVFactoryTest {
-  @Test
-  void shouldLoadConfiguration() {
-    val dto =
-        Assertions.assertDoesNotThrow(
-            () ->
-                TestFdVFactory.loadConfig(
-                    "src/main/java/de/gematik/test/erezept/remotefdv/server/config/config.yaml"));
-    assertDoesNotThrow(dto::getActiveEnvConfig);
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public class ConsentDataMapper {
+  public static Consent from(org.hl7.fhir.r4.model.Consent consent) {
+    val consentDto = new Consent();
+    val kvnr = consent.getPatient().getIdentifier().getValue();
+    val category = consent.getCategoryFirstRep().getCodingFirstRep().getCode();
+    consentDto.setDateTime(consent.getDateTime().toString());
+    consentDto.setKvnr(kvnr);
+    consentDto.setCategory(ConsentCategory.valueOf(category));
+    return consentDto;
   }
 }
