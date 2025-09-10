@@ -5,14 +5,14 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>test-driver-interface-server</artifactId>
     <packaging>jar</packaging>
-    <version>1.1.0</version>
+    <version>1.1.1</version>
     <name>Test Driver Interface Server</name>
     <description>Mock Implementation of OpenAPI</description>
 
     <parent>
         <groupId>de.gematik.erezept.remotefdv</groupId>
         <artifactId>erp-fdv-test-driver-interface</artifactId>
-        <version>1.1.0</version>
+        <version>1.1.1</version>
     </parent>
 
     <profiles>
@@ -347,7 +347,7 @@
         <dependency>
             <groupId>de.gematik.erezept.remotefdv</groupId>
             <artifactId>test-driver-interface-data</artifactId>
-            <version>1.1.0</version>
+            <version>1.1.1</version>
         </dependency>
         <dependency>
             <groupId>io.swagger</groupId>

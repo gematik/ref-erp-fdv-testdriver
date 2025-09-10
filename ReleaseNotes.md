@@ -1,6 +1,6 @@
 # Release Notes ERP FdV Test Driver Interface
 
-## Release 1.1.0
+## Release 1.1.1
 * test-driver-interface-server
   - added smartcards-fdv directory containing test identities
 
