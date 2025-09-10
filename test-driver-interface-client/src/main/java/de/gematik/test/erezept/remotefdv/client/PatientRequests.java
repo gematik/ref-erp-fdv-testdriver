@@ -21,7 +21,10 @@
 package de.gematik.test.erezept.remotefdv.client;
 
 import de.gematik.test.erezept.remotefdv.client.requests.*;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class PatientRequests {
   public static GetPrescription getPrescriptions() {
     return new GetPrescription();
@@ -75,5 +78,34 @@ public class PatientRequests {
 
   public static DeleteCommunicationById deleteCommunicationById(String prescriptionId) {
     return new DeleteCommunicationById(prescriptionId);
+  }
+
+  public static PostConsent postConsent(String category) {
+    return new PostConsent(category);
+  }
+
+  public static GetConsent getConsent(String category) {
+    return new GetConsent(category);
+  }
+
+  public static DeleteConsent deleteConsent(String category) {
+    return new DeleteConsent(category);
+  }
+
+  public static PatchPrescriptionById patchPrescriptionById(
+      String prescriptionId, boolean euRedeemable) {
+    return new PatchPrescriptionById(prescriptionId, euRedeemable);
+  }
+
+  public static PostEUAccessAuthorization postEuAccessAuth(String country, String accessCode) {
+    return new PostEUAccessAuthorization(country, accessCode);
+  }
+
+  public static GetEUAccessAuthorization getEuAccessAuth() {
+    return new GetEUAccessAuthorization();
+  }
+
+  public static DeleteEUAccessAuthorization deleteEuAccessAuth() {
+    return new DeleteEUAccessAuthorization();
   }
 }

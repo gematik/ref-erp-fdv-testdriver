@@ -20,18 +20,18 @@
 
 package de.gematik.test.erezept.remotefdv.server.mapping;
 
-import de.gematik.test.erezept.fhir.resources.erp.ErxMedicationDispense;
-import de.gematik.test.erezept.fhir.resources.erp.GemErpMedication;
-import de.gematik.test.erezept.fhir.resources.kbv.KbvErpMedication;
+import de.gematik.erezept.remotefdv.api.model.Medication;
+import de.gematik.erezept.remotefdv.api.model.MedicationDispense;
+import de.gematik.erezept.remotefdv.api.model.Pharmacist;
+import de.gematik.test.erezept.fhir.r4.erp.ErxMedicationDispense;
+import de.gematik.test.erezept.fhir.r4.erp.GemErpMedication;
+import de.gematik.test.erezept.fhir.r4.kbv.KbvErpMedication;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.val;
 import org.apache.commons.lang3.tuple.Pair;
-import de.gematik.erezept.remotefdv.api.model.Medication;
-import de.gematik.erezept.remotefdv.api.model.MedicationDispense;
-import de.gematik.erezept.remotefdv.api.model.Pharmacist;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class MedicationDispenseDataMapper {

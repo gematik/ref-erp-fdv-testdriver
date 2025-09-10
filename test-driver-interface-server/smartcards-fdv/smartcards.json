@@ -1,0 +1,24 @@
+[
+  {
+    "iccsn": "80276883110000163961",
+    "note": "IKNR 109500969; valid until Wed Mar 21 23:59:59 UTC 2029",
+    "identifier": "X110609524",
+    "type": "EGK",
+    "ownerName": "Prof. Dr. Gunther Michael HütterTEST-ONLY",
+    "stores": [
+      "egk/80276883110000163961/80276883110000163961-C_CH_AUT_E256.p12",
+      "egk/80276883110000163961/80276883110000163961-C_CH_AUT_R2048.p12"
+    ]
+  },
+  {
+    "iccsn": "80276883110000163962",
+    "note": "IKNR: 109500969; valid until Wed Mar 21 23:59:59 UTC 2029",
+    "identifier": "X110670787",
+    "type": "EGK",
+    "ownerName": "Gabriele Marian F. H. E. Freifrau MaiÞerTEST-ONLY",
+    "stores": [
+      "egk/80276883110000163962/80276883110000163962-C_CH_AUT_E256.p12",
+      "egk/80276883110000163962/80276883110000163962-C_CH_AUT_R2048.p12"
+    ]
+  }
+]

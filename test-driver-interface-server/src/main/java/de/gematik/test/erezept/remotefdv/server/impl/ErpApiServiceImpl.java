@@ -22,18 +22,28 @@ package de.gematik.test.erezept.remotefdv.server.impl;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import de.gematik.bbriccs.fhir.de.value.KVNR;
 import de.gematik.bbriccs.smartcards.Egk;
+import de.gematik.bbriccs.smartcards.exceptions.CardNotFoundException;
+import de.gematik.erezept.remotefdv.api.api.ApiResponseMessage;
+import de.gematik.erezept.remotefdv.api.api.ErpApiService;
+import de.gematik.erezept.remotefdv.api.api.NotFoundException;
+import de.gematik.erezept.remotefdv.api.model.*;
 import de.gematik.test.erezept.client.ErpClient;
 import de.gematik.test.erezept.client.rest.ErpResponse;
 import de.gematik.test.erezept.client.rest.param.SortOrder;
 import de.gematik.test.erezept.client.usecases.*;
+import de.gematik.test.erezept.client.usecases.eu.*;
 import de.gematik.test.erezept.client.usecases.search.AuditEventSearch;
 import de.gematik.test.erezept.client.usecases.search.TaskSearch;
 import de.gematik.test.erezept.fhir.builder.erp.ErxCommunicationBuilder;
+import de.gematik.test.erezept.fhir.builder.eu.EuPatchTaskInputBuilder;
 import de.gematik.test.erezept.fhir.extensions.erp.SupplyOptionsType;
 import de.gematik.test.erezept.fhir.values.AccessCode;
+import de.gematik.test.erezept.fhir.values.EuAccessCode;
 import de.gematik.test.erezept.fhir.values.TaskId;
 import de.gematik.test.erezept.fhir.values.json.CommunicationDisReqMessage;
+import de.gematik.test.erezept.fhir.valuesets.IsoCountryCode;
 import de.gematik.test.erezept.remotefdv.server.actors.Patient;
 import de.gematik.test.erezept.remotefdv.server.config.MyConfigurationFactory;
 import de.gematik.test.erezept.remotefdv.server.config.TestFdVFactory;
@@ -56,11 +66,6 @@ import kong.unirest.core.json.JSONException;
 import kong.unirest.core.json.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import org.apache.commons.lang3.NotImplementedException;
-import de.gematik.erezept.remotefdv.api.api.ApiResponseMessage;
-import de.gematik.erezept.remotefdv.api.api.ErpApiService;
-import de.gematik.erezept.remotefdv.api.api.NotFoundException;
-import de.gematik.erezept.remotefdv.api.model.*;
 
 @Slf4j
 @javax.annotation.Generated(
@@ -101,10 +106,15 @@ public class ErpApiServiceImpl extends ErpApiService {
   public Response buildOperationOutcomeDto(ErpResponse response) {
     val oo = response.getAsOperationOutcome();
     val dto = new OperationOutcome();
+    dto.setErrorCode("-");
+    dto.setDiagnostics("-");
     dto.setStatusCode(BigDecimal.valueOf(response.getStatusCode()));
     dto.setDetails(oo.getIssueFirstRep().getDetails().getText());
     dto.setCode(OperationOutcome.CodeEnum.fromValue(oo.getIssueFirstRep().getCode().toCode()));
-    dto.setDiagnostics(oo.getIssueFirstRep().getDiagnostics());
+    val diagnostics = oo.getIssueFirstRep().getDiagnostics();
+    if (diagnostics != null) {
+      dto.setDiagnostics(diagnostics);
+    }
     return Response.status(response.getStatusCode()).entity(dto).build();
   }
 
@@ -196,26 +206,25 @@ public class ErpApiServiceImpl extends ErpApiService {
           .entity(new ApiResponseMessage(ApiResponseMessage.ERROR, "Request body is required"))
           .build();
     }
-    String configPath = System.getenv("CONFIG_PATH");
-    if (configPath == null) {
-      configPath =
-          "test-driver-interface-server/src/main/java/de/gematik/test/erezept/remotefdv/server/config/config.yaml";
-    }
+    String configPath =
+        System.getenv()
+            .getOrDefault(
+                "CONFIG_PATH",
+                "test-driver-interface-server/src/main/java/de/gematik/test/erezept/remotefdv/server/config/config.yaml");
     try {
       mcf = TestFdVFactory.loadConfig(configPath);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-    egk = mcf.getEgkByKvnr(kvnr);
-    try {
+      egk = mcf.getEgkByKvnr(kvnr);
       erpClient = mcf.createErpClientForPatient(kvnr, patient);
-    } catch (NoSuchEnvironmentException e) {
+    } catch (NoSuchEnvironmentException | CardNotFoundException ex) {
       return Response.status(400)
-          .entity(new ApiResponseMessage(ApiResponseMessage.ERROR, e.getMessage()))
+          .entity(new ApiResponseMessage(ApiResponseMessage.ERROR, ex.getMessage()))
+          .build();
+    } catch (Exception ex) {
+      return Response.status(500)
+          .entity(new ApiResponseMessage(ApiResponseMessage.ERROR, ex.getMessage()))
           .build();
     }
     erpClient.authenticateWith(egk);
-
     LoginSuccess loginSuccess = new LoginSuccess();
     accessToken = erpClient.getAuthentication().get().getAccessToken().getRawString();
     loginSuccess.setAccessToken(accessToken);
@@ -291,7 +300,7 @@ public class ErpApiServiceImpl extends ErpApiService {
       return buildOperationOutcomeDto(res);
     }
     val accessCode = res.getExpectedResource().getTask().getAccessCode().getValue();
-    val baoDmc = DataMatrixCodeGenerator.writeToStream(taskId, AccessCode.fromString(accessCode));
+    val baoDmc = DataMatrixCodeGenerator.writeToStream(taskId, AccessCode.from(accessCode));
     val encoded = Base64.getEncoder().encodeToString(baoDmc.toByteArray());
     return responseBuilder.entity(encoded).build();
   }
@@ -335,11 +344,16 @@ public class ErpApiServiceImpl extends ErpApiService {
           .entity(new ApiResponseMessage(ApiResponseMessage.ERROR, "Entry telematikId is required"))
           .build();
     }
+    /*val erxCommunication =
+    ErxCommunicationBuilder.builder()
+        .basedOnTask(taskId, accessCode)
+        .recipient(telematikId)
+        .buildDispReq(dispReqMessage);*/
     val erxCommunication =
-        ErxCommunicationBuilder.builder()
-            .basedOnTask(taskId, accessCode)
-            .recipient(telematikId)
-            .buildDispReq(dispReqMessage);
+        ErxCommunicationBuilder.forDispenseRequest(dispReqMessage)
+            .basedOn(taskId, accessCode)
+            .receiver(telematikId)
+            .build();
 
     val response = patient.erpRequest(new CommunicationPostCommand(erxCommunication));
     if (response.isOperationOutcome() || response.getStatusCode() > 299) {
@@ -429,6 +443,7 @@ public class ErpApiServiceImpl extends ErpApiService {
     val zonedDateTime = ZonedDateTime.now(ZoneId.of("UTC"));
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
     startTime = zonedDateTime.format(formatter);
+    log.info("WORKING_DIRECTORY: " + System.getProperty("user.dir"));
 
     return Response.ok()
         .entity(new ApiResponseMessage(ApiResponseMessage.OK, "Test-FdV is running"))
@@ -454,37 +469,143 @@ public class ErpApiServiceImpl extends ErpApiService {
   @Override
   public Response erpTestdriverApiV1ConsentPost(
       ConsentCategory category, SecurityContext securityContext) throws NotFoundException {
-    throw new NotImplementedException("This function is not implemented yet");
+    val responseBuilder = checkRequiredFields();
+    if (responseBuilder.build().getStatus() >= 400) {
+      return responseBuilder.build();
+    }
+    val kvnr = KVNR.from(egk.getKvnr());
+
+    if (category == ConsentCategory.EUDISPCONS) {
+      val response = patient.erpRequest(new EuConsentPostCommand(kvnr));
+      if (response.isOperationOutcome()) {
+        return buildOperationOutcomeDto(response);
+      }
+      val euConsent = response.getExpectedResource();
+      val consentDto = ConsentDataMapper.from(euConsent);
+      consentDto.setCategory(category);
+      return Response.status(201).entity(consentDto).build();
+    } else {
+      val response = patient.erpRequest(new ConsentPostCommand(kvnr));
+      if (response.isOperationOutcome()) {
+        return buildOperationOutcomeDto(response);
+      }
+      val consent = response.getExpectedResource();
+      val consentDto = ConsentDataMapper.from(consent);
+      return Response.status(201).entity(consentDto).build();
+    }
   }
 
   @Override
   public Response erpTestdriverApiV1ConsentDelete(
       ConsentCategory category, SecurityContext securityContext) throws NotFoundException {
-    throw new NotImplementedException("This function is not implemented yet");
+    val responseBuilder = checkRequiredFields();
+    if (responseBuilder.build().getStatus() >= 400) {
+      return responseBuilder.build();
+    }
+    if (category == ConsentCategory.EUDISPCONS) {
+      val response = patient.erpRequest(new EuConsentDeleteCommand());
+      if (response.isOperationOutcome()) {
+        return buildOperationOutcomeDto(response);
+      }
+      return Response.status(204).build();
+    } else {
+      val response = patient.erpRequest(new ConsentDeleteCommand());
+      if (response.isOperationOutcome()) {
+        return buildOperationOutcomeDto(response);
+      }
+      return Response.status(204).build();
+    }
   }
 
   @Override
   public Response erpTestdriverApiV1ConsentGet(
       ConsentCategory category, SecurityContext securityContext) throws NotFoundException {
-    throw new NotImplementedException("This function is not implemented yet");
+    val responseBuilder = checkRequiredFields();
+    if (responseBuilder.build().getStatus() >= 400) {
+      return responseBuilder.build();
+    }
+    if (category == ConsentCategory.EUDISPCONS) {
+      val response = patient.erpRequest(new EuConsentGetCommand());
+      if (response.isOperationOutcome()) {
+        return buildOperationOutcomeDto(response);
+      }
+      val consentBundle = response.getExpectedResource();
+      val consent = consentBundle.getConsent();
+      if (consent.isEmpty()) {
+        return Response.status(404)
+            .entity(
+                new ApiResponseMessage(
+                    ApiResponseMessage.ERROR, "Consent not found for current patient and category"))
+            .build();
+      }
+      val consentDto = ConsentDataMapper.from(consent);
+      consentDto.setCategory(category);
+      return responseBuilder.entity(consentDto).build();
+    } else {
+      val response = patient.erpRequest(new ConsentGetCommand());
+      if (response.isOperationOutcome()) {
+        return buildOperationOutcomeDto(response);
+      }
+      val consentBundle = response.getExpectedResource();
+      val consent = consentBundle.getConsent();
+      if (consent.isEmpty()) {
+        return Response.status(404)
+            .entity(
+                new ApiResponseMessage(
+                    ApiResponseMessage.ERROR, "Consent not found for current patient and category"))
+            .build();
+      }
+      val consentDto = ConsentDataMapper.from(consent.get());
+      return responseBuilder.entity(consentDto).build();
+    }
   }
 
   @Override
   public Response erpTestdriverApiV1EuAccessAuthorizationPost(
       String country, String accessCode, SecurityContext securityContext) throws NotFoundException {
-    throw new NotImplementedException("This function is not implemented yet");
+    val responseBuilder = checkRequiredFields();
+    if (responseBuilder.build().getStatus() >= 400) {
+      return responseBuilder.build();
+    }
+    val euAccessCode = EuAccessCode.from(accessCode);
+    val isoCountryCode = IsoCountryCode.valueOf(country);
+    val response = patient.erpRequest(new EuGrantAccessPostCommand(euAccessCode, isoCountryCode));
+    if (response.isOperationOutcome()) {
+      return buildOperationOutcomeDto(response);
+    }
+    val authorization = response.getExpectedResource();
+    val authorizationDto = EuAccessAuthorizationMapper.from(authorization);
+    return Response.status(201).entity(authorizationDto).build();
   }
 
   @Override
   public Response erpTestdriverApiV1EuAccessAuthorizationDelete(SecurityContext securityContext)
       throws NotFoundException {
-    throw new NotImplementedException("This function is not implemented yet");
+    val responseBuilder = checkRequiredFields();
+    if (responseBuilder.build().getStatus() >= 400) {
+      return responseBuilder.build();
+    }
+    val response = patient.erpRequest(new EuGrantAccessDeleteCommand());
+    if (response.isOperationOutcome()) {
+      return buildOperationOutcomeDto(response);
+    }
+    return Response.status(204).build();
   }
 
   @Override
   public Response erpTestdriverApiV1EuAccessAuthorizationGet(SecurityContext securityContext)
       throws NotFoundException {
-    throw new NotImplementedException("This function is not implemented yet");
+    val responseBuilder = checkRequiredFields();
+    if (responseBuilder.build().getStatus() >= 400) {
+      return responseBuilder.build();
+    }
+    val response = patient.erpRequest(new EuGrantAccessGetCommand());
+    if (response.isOperationOutcome()) {
+      return buildOperationOutcomeDto(response);
+    }
+    val authorization = response.getExpectedResource();
+    val authorizationDto = EuAccessAuthorizationMapper.from(authorization);
+    return responseBuilder.entity(authorizationDto).build();
   }
 
   @Override
@@ -493,6 +614,22 @@ public class ErpApiServiceImpl extends ErpApiService {
       ErpTestdriverApiV1PrescriptionIdPatchRequest patchRequest,
       SecurityContext securityContext)
       throws NotFoundException {
-    throw new NotImplementedException("This function is not implemented yet");
+    val responseBuilder = checkRequiredFields();
+    if (responseBuilder.build().getStatus() >= 400) {
+      return responseBuilder.build();
+    }
+    val isRedeemable = patchRequest.getEuRedeemableByPatient();
+    val parameters = EuPatchTaskInputBuilder.builder().withIsRedeemable(isRedeemable).build();
+    val response = patient.erpRequest(new TaskPatchCommand(TaskId.from(id), parameters));
+    if (response.isOperationOutcome()) {
+      return buildOperationOutcomeDto(response);
+    }
+    // request Task by ID to access the kbvBundle of the prescription
+    val erxPresBundle = patient.erpRequest(new TaskGetByIdCommand(TaskId.from(id)));
+    val kbvBundle = erxPresBundle.getExpectedResource().getKbvBundle().get();
+
+    val prescriptionDto = PrescriptionDataMapper.from(response.getExpectedResource(), kbvBundle);
+    prescriptionDto.setEuRedeemableByPatient(isRedeemable);
+    return responseBuilder.entity(prescriptionDto).build();
   }
 }

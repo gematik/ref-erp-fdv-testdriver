@@ -1,9 +1,13 @@
 # Release Notes ERP FdV Test Driver Interface
 
+## Release 1.1.0
+* test-driver-interface-server
+  - added smartcards-fdv directory containing test identities
+
 ## Release 1.0.9
 
 * openapi 
-  - refactor the module to keep older versions of the OpenAPI for more clarity
+  - refactored the module to keep older versions of the OpenAPI for more clarity
 
 
   

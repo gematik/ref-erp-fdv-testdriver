@@ -87,8 +87,8 @@ components:
                 - invalid
                 - unknown
                 - forbidden
-                - not_found
-                - not_supported
+                - not-found
+                - not-supported
                 - conflict
                 - processing
                 - value

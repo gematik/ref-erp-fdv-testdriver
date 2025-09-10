@@ -20,27 +20,22 @@
 
 package de.gematik.test.erezept.remotefdv.server.mapping;
 
-import de.gematik.erezept.remotefdv.api.model.Info;
-import de.gematik.erezept.remotefdv.api.model.TestFdV;
+import de.gematik.erezept.remotefdv.api.model.EUAccessAuthorization;
+import de.gematik.test.erezept.fhir.r4.eu.EuAccessPermission;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import lombok.val;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class InformationBuilder {
-
-  public static Info build(String startTime) {
-    Info info = new Info();
-    info.setStartTime(startTime);
-    info.setTitle("Test driver interface of ERP Test-FdV Module");
-    info.setTestDriverVersion("1.1.0");
-
-    TestFdV testFdV = new TestFdV();
-    testFdV.setPlatform(TestFdV.PlatformEnum.ANDROID);
-    testFdV.setPlatformVersion("14.0.0");
-    testFdV.isEmulated(true);
-    testFdV.status(TestFdV.StatusEnum.RUNNING);
-    testFdV.setStartTime(startTime);
-    info.setTestFdV(testFdV);
-    return info;
+public class EuAccessAuthorizationMapper {
+  public static EUAccessAuthorization from(EuAccessPermission permission) {
+    val euAccessAuthDto = new EUAccessAuthorization();
+    euAccessAuthDto.setAccessCode(permission.getAccessPermissionCode());
+    euAccessAuthDto.setCountry(permission.getIsoCountryCode().getCode());
+    val createdAt = permission.getCreateAt();
+    createdAt.ifPresent(instant -> euAccessAuthDto.setCreatedAt(instant.toString()));
+    val validUntil = permission.getValidUntil();
+    validUntil.ifPresent(instant -> euAccessAuthDto.setValidUntil(instant.toString()));
+    return euAccessAuthDto;
   }
 }

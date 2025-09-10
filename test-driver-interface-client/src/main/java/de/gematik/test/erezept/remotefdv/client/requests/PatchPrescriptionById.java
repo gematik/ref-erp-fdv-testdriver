@@ -24,19 +24,24 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import de.gematik.erezept.remotefdv.api.model.Prescription;
 import de.gematik.test.erezept.remotefdv.client.HttpRequestInfo;
 import java.util.List;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import org.json.JSONObject;
 
-@Getter
-@RequiredArgsConstructor
-public class GetPrescription implements PatientRequests<Prescription> {
-  private final Class<Prescription> type = Prescription.class;
-
-  private final TypeReference<List<Prescription>> typeReference = new TypeReference<>() {};
+@AllArgsConstructor
+public class PatchPrescriptionById implements PatientRequests<Prescription> {
+  private final String prescriptionId;
+  private final boolean euRedeemable;
+  private final @Getter Class<Prescription> type = Prescription.class;
+  private final @Getter TypeReference<List<Prescription>> typeReference = new TypeReference<>() {};
 
   @Override
   public void finalizeRequest(HttpRequestInfo rb) {
-    rb.setMethod("GET");
+    rb.setMethod("PATCH");
     rb.setResource("prescription");
+    rb.setResourceId(prescriptionId);
+    JSONObject jsonObject = new JSONObject();
+    jsonObject.put("euRedeemableByPatient", euRedeemable);
+    rb.setBody(jsonObject.toString());
   }
 }

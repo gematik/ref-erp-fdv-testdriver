@@ -18,16 +18,25 @@
  * For additional notes and disclaimer from gematik and in case of changes by gematik find details in the "Readme" file.
  */
 
-package de.gematik.test.erezept.remotefdv.server.factories;
+package de.gematik.test.erezept.remotefdv.client.requests;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import com.fasterxml.jackson.core.type.TypeReference;
+import de.gematik.test.erezept.remotefdv.client.HttpRequestInfo;
+import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
-import de.gematik.erezept.remotefdv.api.api.factories.ErpApiServiceFactory;
-import org.junit.jupiter.api.Test;
+@AllArgsConstructor
+@Getter
+public class DeleteConsent implements PatientRequests<String> {
+  private final String category;
+  private final Class<String> type = String.class;
+  private final @Getter TypeReference<List<String>> typeReference = new TypeReference<>() {};
 
-class ErpApiServiceFactoryTest {
-  @Test
-  void shouldGetErpApi() {
-    assertDoesNotThrow(ErpApiServiceFactory::getErpApi);
+  @Override
+  public void finalizeRequest(HttpRequestInfo rb) {
+    rb.setMethod("DELETE");
+    rb.setResource("consent");
+    rb.setParameters("category", category);
   }
 }

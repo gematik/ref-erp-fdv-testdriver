@@ -18,17 +18,20 @@
  * For additional notes and disclaimer from gematik and in case of changes by gematik find details in the "Readme" file.
  */
 
-package de.gematik.test.erezept.remotefdv.server.webservice.mapping;
+package de.gematik.test.erezept.remotefdv.client.requests;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import com.fasterxml.jackson.core.type.TypeReference;
+import de.gematik.test.erezept.remotefdv.client.HttpRequestInfo;
+import java.util.List;
+import lombok.Getter;
 
-import de.gematik.bbriccs.utils.PrivateConstructorsUtil;
-import de.gematik.test.erezept.remotefdv.server.mapping.AuditEventDataMapper;
-import org.junit.jupiter.api.Test;
+public class DeleteEUAccessAuthorization implements PatientRequests<String> {
+  private final @Getter Class<String> type = String.class;
+  private final @Getter TypeReference<List<String>> typeReference = new TypeReference<>() {};
 
-class AuditEventDataMapperTest {
-  @Test
-  void shouldNotInstantiate() {
-    assertTrue(PrivateConstructorsUtil.isUtilityConstructor(AuditEventDataMapper.class));
+  @Override
+  public void finalizeRequest(HttpRequestInfo rb) {
+    rb.setMethod("DELETE");
+    rb.setResource("eu-access-authorization");
   }
 }

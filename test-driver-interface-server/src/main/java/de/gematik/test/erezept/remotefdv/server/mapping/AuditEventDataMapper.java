@@ -20,17 +20,16 @@
 
 package de.gematik.test.erezept.remotefdv.server.mapping;
 
-import de.gematik.test.erezept.fhir.resources.erp.ErxAuditEvent;
+import de.gematik.erezept.remotefdv.api.model.AuditEvent;
+import de.gematik.test.erezept.fhir.r4.erp.ErxAuditEvent;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.val;
-import de.gematik.erezept.remotefdv.api.model.AuditEvent;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class AuditEventDataMapper {
-  private AuditEventDataMapper() {
-    // hide constructor
-    throw new IllegalAccessError("Utility class");
-  }
 
   public static AuditEvent from(ErxAuditEvent erxAuditEvent) {
     val auditEvent = new AuditEvent();

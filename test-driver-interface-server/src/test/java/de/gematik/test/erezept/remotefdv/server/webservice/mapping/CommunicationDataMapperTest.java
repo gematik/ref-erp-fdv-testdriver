@@ -25,12 +25,12 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import de.gematik.bbriccs.utils.PrivateConstructorsUtil;
-import de.gematik.test.erezept.fhir.parser.profiles.IStructureDefinition;
-import de.gematik.test.erezept.fhir.resources.erp.CommunicationType;
-import de.gematik.test.erezept.fhir.resources.erp.ErxCommunication;
-import de.gematik.test.erezept.fhir.resources.erp.ICommunicationType;
-import de.gematik.test.erezept.fhir.values.KVNR;
+import de.gematik.bbriccs.fhir.coding.WithStructureDefinition;
+import de.gematik.bbriccs.fhir.de.value.KVNR;
+import de.gematik.erezept.remotefdv.api.model.SupplyOptionsType;
+import de.gematik.test.erezept.fhir.r4.erp.CommunicationType;
+import de.gematik.test.erezept.fhir.r4.erp.ErxCommunication;
+import de.gematik.test.erezept.fhir.r4.erp.ICommunicationType;
 import de.gematik.test.erezept.fhir.values.PrescriptionId;
 import de.gematik.test.erezept.fhir.values.TaskId;
 import de.gematik.test.erezept.remotefdv.server.mapping.CommunicationDataMapper;
@@ -41,22 +41,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import de.gematik.erezept.remotefdv.api.model.SupplyOptionsType;
 
 class CommunicationDataMapperTest {
   private ErxCommunication erxCommunication;
-  private IStructureDefinition def;
-
-  @Test
-  void shouldNotInstantiate() {
-    assertTrue(PrivateConstructorsUtil.isUtilityConstructor(CommunicationDataMapper.class));
-  }
+  private WithStructureDefinition def;
 
   @BeforeEach
-  public void setUp() {
+  void setUp() {
     erxCommunication = mock(ErxCommunication.class);
     val comType = mock(ICommunicationType.class);
-    def = mock(IStructureDefinition.class);
+    def = mock(WithStructureDefinition.class);
     when(erxCommunication.getUnqualifiedId()).thenReturn(UUID.randomUUID().toString());
     when(erxCommunication.getBasedOnReferenceId()).thenReturn(TaskId.from(PrescriptionId.random()));
     when(erxCommunication.getSenderId()).thenReturn(fakerTelematikId());

@@ -20,19 +20,18 @@
 
 package de.gematik.test.erezept.remotefdv.server.mapping;
 
-import de.gematik.test.erezept.fhir.resources.erp.ErxTask;
-import de.gematik.test.erezept.fhir.resources.kbv.KbvErpBundle;
+import de.gematik.erezept.remotefdv.api.model.*;
+import de.gematik.test.erezept.fhir.r4.erp.ErxTask;
+import de.gematik.test.erezept.fhir.r4.kbv.KbvErpBundle;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.val;
-import de.gematik.erezept.remotefdv.api.model.*;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class PrescriptionDataMapper {
-  private PrescriptionDataMapper() {
-    // hide constructor
-    throw new IllegalAccessError("Utility class");
-  }
 
   public static Prescription from(ErxTask task) {
     val prescription = new Prescription();
@@ -50,15 +49,20 @@ public class PrescriptionDataMapper {
 
     patientDto.setName(kbvBundle.getPatient().getFullname());
     patientDto.setKvnr(kbvBundle.getPatient().getKvnr().getValue());
-    patientDto.setInsuranceType(
-        Patient.InsuranceTypeEnum.fromValue(kbvBundle.getPatient().getInsuranceKind().getCode()));
+
+    if (kbvBundle.getPatient().hasGkvKvnr()) {
+      patientDto.setInsuranceType(Patient.InsuranceTypeEnum.GKV);
+    } else {
+      patientDto.setInsuranceType(Patient.InsuranceTypeEnum.PKV);
+    }
 
     practitioner.setName(kbvBundle.getPractitioner().getFullName());
     practitioner.setQualificationType(
         kbvBundle.getPractitioner().getQualificationType().getDisplay());
-    practitioner.setAnrType(
-        Practitioner.AnrTypeEnum.fromValue(kbvBundle.getPractitioner().getANRType().name()));
-    practitioner.setAnr(kbvBundle.getPractitioner().getANR().getValue());
+    val baseANR = kbvBundle.getPractitioner().getANR();
+    baseANR.ifPresent(
+        anr -> practitioner.setAnrType(Practitioner.AnrTypeEnum.fromValue(anr.getType().name())));
+    baseANR.ifPresent(anr -> practitioner.setAnr(anr.getValue()));
 
     val kbvErpMedication = kbvBundle.getMedication();
     kbvErpMedication
@@ -83,6 +87,11 @@ public class PrescriptionDataMapper {
     prescription.setExpiryDate(formatToUTC(task.getExpiryDate()));
     prescription.setStatus(Prescription.StatusEnum.fromValue(task.getStatus().toCode()));
     prescription.setWorkFlow(WorkFlow.fromValue(task.getFlowType().getCode()));
+
+    val lastMedDispense = task.getLastMedicationDispenseDate();
+    lastMedDispense.ifPresent(
+        instant -> prescription.setLastMedicationDispense(instant.toString()));
+    prescription.setEuRedeemableByProperties(true); // TODO find this parameter from ErxTask
   }
 
   private static String formatToUTC(Date date) {

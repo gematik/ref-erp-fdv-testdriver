@@ -23,12 +23,13 @@ package de.gematik.test.erezept.remotefdv.client;
 import static java.text.MessageFormat.format;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.gematik.erezept.remotefdv.api.model.Error;
 import de.gematik.test.erezept.remotefdv.client.requests.PatientRequests;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.net.URI;
-import java.net.URLEncoder;
+import java.net.*;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -37,7 +38,6 @@ import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import de.gematik.erezept.remotefdv.api.model.Error;
 
 @Slf4j
 public class RemoteFdVClient {
@@ -51,7 +51,7 @@ public class RemoteFdVClient {
     return new Builder();
   }
 
-  public <T> FdVResponse<T> sendRequest(PatientRequests<T> request) {
+  public <T> FdVResponse<T> sendRequest(PatientRequests<T> request) throws NoSuchMethodException {
     request.finalizeRequest(requestInfo);
     val fullUrl =
         new StringBuilder(
@@ -94,9 +94,13 @@ public class RemoteFdVClient {
       case "DELETE":
         requestBuilder.DELETE();
         break;
+      case "PATCH":
+        requestBuilder.method("PATCH", body);
+        break;
       default:
-        log.error("Provided method does not exist");
+        throw new NoSuchMethodException("Provided method does not exist");
     }
+
     HttpClient httpClient = HttpClient.newHttpClient();
     HttpResponse<String> response = null;
     try {
@@ -107,29 +111,51 @@ public class RemoteFdVClient {
     assert response != null;
     if (response.statusCode() >= 400) {
       val errorResponse = new FdVResponse<Error>();
-      errorResponse.setExpectedResource(Collections.emptyList());
       errorResponse.setOperationOutcome(buildOperationOutcome(response));
       return (FdVResponse<T>) errorResponse;
     }
     val resource = deserialize(response.body(), request);
     val fdvResponse = new FdVResponse<T>();
-    fdvResponse.setExpectedResource(resource);
+    fdvResponse.setResourcesList(resource);
     return fdvResponse;
   }
 
   public <T> List<T> deserialize(String response, PatientRequests<T> request) {
+    val objectMapper = new ObjectMapper();
+    objectMapper.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
     if (request.getType().equals(String.class)) {
       val list = List.of(response);
       return (List<T>) list;
-    } else {
-      val objectMapper = new ObjectMapper();
-
+    }
+    if (!response.isEmpty()) {
       try {
         return objectMapper.readValue(response, request.getTypeReference());
       } catch (JsonProcessingException e) {
         throw new RuntimeException(e);
       }
+    } else {
+      return Collections.emptyList();
     }
+    // TODO refactor this method
+    /*if (request.getType().equals(String.class)) {
+      val list = List.of(response);
+      return (List<T>) list;
+    } else if (request.getType().equals(Consent.class)) {
+      val jsonObject = new JSONObject(response);
+      val jsonArray = new JSONArray();
+      jsonArray.put(jsonObject);
+        try {
+            return objectMapper.readValue(jsonArray.toString(), request.getTypeReference());
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    } else {
+      try {
+        return objectMapper.readValue(response, request.getTypeReference());
+      } catch (JsonProcessingException e) {
+        throw new RuntimeException(e);
+      }
+    }*/
   }
 
   public Error buildOperationOutcome(HttpResponse<String> response) {

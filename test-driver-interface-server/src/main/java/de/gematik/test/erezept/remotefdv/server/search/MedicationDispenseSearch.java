@@ -30,8 +30,8 @@ import java.util.List;
 
 public class MedicationDispenseSearch {
   private MedicationDispenseSearch() {
-    // hide constructor
-    throw new IllegalAccessError("Utility class");
+    // do not instantiate
+    throw new IllegalStateException("Utility class");
   }
 
   public static Builder searchFor() {

@@ -49,7 +49,7 @@ public class HttpRequestInfo {
     this.resource = resource;
   }
 
-  public void setQuery(String key, String value) {
+  public void setParameters(String key, String value) {
     query.put(key, value);
   }
 

@@ -21,22 +21,21 @@
 package de.gematik.test.erezept.remotefdv.client.requests;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import de.gematik.erezept.remotefdv.api.model.Prescription;
+import de.gematik.erezept.remotefdv.api.model.EUAccessAuthorization;
 import de.gematik.test.erezept.remotefdv.client.HttpRequestInfo;
 import java.util.List;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
-@Getter
-@RequiredArgsConstructor
-public class GetPrescription implements PatientRequests<Prescription> {
-  private final Class<Prescription> type = Prescription.class;
-
-  private final TypeReference<List<Prescription>> typeReference = new TypeReference<>() {};
+@AllArgsConstructor
+public class GetEUAccessAuthorization implements PatientRequests<EUAccessAuthorization> {
+  private final @Getter Class<EUAccessAuthorization> type = EUAccessAuthorization.class;
+  private final @Getter TypeReference<List<EUAccessAuthorization>> typeReference =
+      new TypeReference<>() {};
 
   @Override
   public void finalizeRequest(HttpRequestInfo rb) {
     rb.setMethod("GET");
-    rb.setResource("prescription");
+    rb.setResource("eu-access-authorization");
   }
 }

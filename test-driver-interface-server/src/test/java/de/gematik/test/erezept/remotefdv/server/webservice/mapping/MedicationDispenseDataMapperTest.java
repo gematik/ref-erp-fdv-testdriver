@@ -26,9 +26,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import de.gematik.test.erezept.fhir.resources.erp.ErxMedicationDispense;
-import de.gematik.test.erezept.fhir.resources.erp.GemErpMedication;
-import de.gematik.test.erezept.fhir.values.PZN;
+import de.gematik.bbriccs.fhir.de.value.PZN;
+import de.gematik.test.erezept.fhir.r4.erp.ErxMedicationDispense;
+import de.gematik.test.erezept.fhir.r4.erp.GemErpMedication;
+import de.gematik.test.erezept.fhir.values.PrescriptionId;
 import de.gematik.test.erezept.remotefdv.server.mapping.MedicationDispenseDataMapper;
 import java.util.Date;
 import java.util.Optional;
@@ -48,7 +49,7 @@ class MedicationDispenseDataMapperTest {
     when(gemErpMedication.getPzn()).thenReturn(Optional.of(PZN.random()));
     when(gemErpMedication.getId()).thenReturn(UUID.randomUUID().toString());
 
-    when(erxMedDispense.getPrescriptionId()).thenReturn(fakerPrescriptionId());
+    when(erxMedDispense.getPrescriptionId()).thenReturn(PrescriptionId.from(fakerPrescriptionId()));
     when(erxMedDispense.getWhenHandedOver()).thenReturn(new Date());
     when(erxMedDispense.getPerformerIdFirstRep()).thenReturn(fakerTelematikId());
     when(erxMedDispense.getPerformerFirstRep())

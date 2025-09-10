@@ -20,18 +20,17 @@
 
 package de.gematik.test.erezept.remotefdv.server.mapping;
 
-import de.gematik.test.erezept.fhir.resources.erp.ErxCommunication;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-import lombok.val;
 import de.gematik.erezept.remotefdv.api.model.Communication;
 import de.gematik.erezept.remotefdv.api.model.SupplyOptionsType;
+import de.gematik.test.erezept.fhir.r4.erp.ErxCommunication;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+import lombok.val;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CommunicationDataMapper {
-  private CommunicationDataMapper() {
-    // hide constructor
-    throw new IllegalAccessError("Utility class");
-  }
 
   public static Communication from(ErxCommunication resource) {
     val com = new Communication();
