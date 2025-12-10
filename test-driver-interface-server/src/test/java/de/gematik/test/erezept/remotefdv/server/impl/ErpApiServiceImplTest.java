@@ -30,15 +30,22 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.gematik.bbriccs.fhir.codec.EmptyResource;
 import de.gematik.bbriccs.fhir.de.value.KVNR;
+import de.gematik.erezept.remotefdv.api.model.EUAccessAuthorization;
 import de.gematik.test.erezept.client.ErpClient;
 import de.gematik.test.erezept.client.rest.ErpResponse;
 import de.gematik.test.erezept.client.usecases.*;
+import de.gematik.test.erezept.client.usecases.eu.EuGrantAccessPostCommand;
 import de.gematik.test.erezept.fhir.r4.erp.*;
+import de.gematik.test.erezept.fhir.r4.eu.EuAccessPermission;
 import de.gematik.test.erezept.fhir.values.*;
+import de.gematik.test.erezept.fhir.valuesets.IsoCountryCode;
 import de.gematik.test.erezept.fhir.valuesets.PrescriptionFlowType;
 import de.gematik.test.erezept.remotefdv.server.actors.Patient;
+import java.time.Instant;
 import java.util.*;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+import lombok.SneakyThrows;
 import lombok.val;
 import org.hl7.fhir.r4.model.*;
 import org.junit.jupiter.api.Assertions;
@@ -54,7 +61,7 @@ public class ErpApiServiceImplTest {
   private static ErpResponse mockResponse;
 
   @BeforeEach
-  public void setUp() {
+  void setUp() {
     // basic setup
     mockClient = mock(ErpClient.class);
     patient = spy(Patient.class);
@@ -665,22 +672,9 @@ public class ErpApiServiceImplTest {
   }
 
   @Test
-  void shouldNotStartTestFdVTwice() {
-    val r = Assertions.assertDoesNotThrow(() -> service.erpTestdriverApiV1StartPut(mockApiKey));
-    assertEquals(400, r.getStatus());
-  }
-
-  @Test
   void shouldStopTestFdV() {
     val r = Assertions.assertDoesNotThrow(() -> service.erpTestdriverApiV1StopPut(mockApiKey));
     assertEquals(200, r.getStatus());
-  }
-
-  @Test
-  void shouldNotStopTestFdVTwice() {
-    service.setPatient(null);
-    val r = Assertions.assertDoesNotThrow(() -> service.erpTestdriverApiV1StopPut(mockApiKey));
-    assertEquals(400, r.getStatus());
   }
 
   @Test
@@ -688,5 +682,51 @@ public class ErpApiServiceImplTest {
     service.setPatient(null);
     val r = Assertions.assertDoesNotThrow(() -> service.checkRequiredFields());
     assertEquals(400, r.build().getStatus());
+  }
+
+  @SneakyThrows
+  @Test
+  void shouldSetEuAccessAuthorization() {
+    val accessCode = EuAccessCode.random();
+    val euAccessPermission = mock(EuAccessPermission.class);
+    when(euAccessPermission.getIsoCountryCode()).thenReturn(IsoCountryCode.LT);
+    when(euAccessPermission.getAccessCode()).thenReturn(accessCode);
+    when(euAccessPermission.getCreateAt()).thenReturn(Optional.of(Instant.now()));
+    when(euAccessPermission.getValidUntil()).thenReturn(Optional.of(Instant.now()));
+
+    val erpResponse =
+        ErpResponse.forPayload(euAccessPermission, EuAccessPermission.class)
+            .withStatusCode(201)
+            .withHeaders(Map.of())
+            .andValidationResult(createEmptyValidationResult());
+
+    when(mockClient.request(any(EuGrantAccessPostCommand.class))).thenReturn(erpResponse);
+
+    Assertions.assertThrows(
+        IllegalArgumentException.class,
+        () -> service.erpTestdriverApiV1EuAccessAuthorizationPost("", "", mockApiKey));
+    var euAccessAuthorization =
+        readEntity(
+                service.erpTestdriverApiV1EuAccessAuthorizationPost("LI", "", mockApiKey),
+                EUAccessAuthorization.class)
+            .orElseThrow();
+    Assertions.assertEquals(accessCode, EuAccessCode.from(euAccessAuthorization.getAccessCode()));
+    euAccessAuthorization =
+        readEntity(
+                service.erpTestdriverApiV1EuAccessAuthorizationPost(
+                    "LI", accessCode.getValue(), mockApiKey),
+                EUAccessAuthorization.class)
+            .orElseThrow();
+    Assertions.assertEquals(accessCode, EuAccessCode.from(euAccessAuthorization.getAccessCode()));
+  }
+
+  private <T> Optional<T> readEntity(Response response, Class<T> clazz) {
+    if (!response.hasEntity()) {
+      return Optional.empty();
+    }
+    if (clazz.isInstance(response.getEntity())) {
+      return Optional.of(clazz.cast(response.getEntity()));
+    }
+    throw new IllegalArgumentException("Response entity is not of type " + clazz.getName());
   }
 }

@@ -51,7 +51,7 @@ public class RemoteFdVClient {
     return new Builder();
   }
 
-  public <T> FdVResponse<T> sendRequest(PatientRequests<T> request) throws NoSuchMethodException {
+  public <T> FdVResponse<T> sendRequest(PatientRequests<T> request) {
     request.finalizeRequest(requestInfo);
     val fullUrl =
         new StringBuilder(
@@ -98,23 +98,34 @@ public class RemoteFdVClient {
         requestBuilder.method("PATCH", body);
         break;
       default:
-        throw new NoSuchMethodException("Provided method does not exist");
+        val error = new Error();
+        error.setStatusCode(BigDecimal.valueOf(405));
+        error.setDetails("Unsupported request method: " + requestInfo.getMethod());
+        val errorResponse = new FdVResponse<Error>();
+        errorResponse.setResourcesList(Collections.emptyList());
+        errorResponse.setOperationOutcome(error);
+        return (FdVResponse<T>) errorResponse;
     }
 
     HttpClient httpClient = HttpClient.newHttpClient();
     HttpResponse<String> response = null;
+    log.info("Sending request to {}", fullUrl);
     try {
       response = httpClient.send(requestBuilder.build(), HttpResponse.BodyHandlers.ofString());
     } catch (IOException | InterruptedException e) {
-      e.printStackTrace();
+      throw new RemoteFdVErrorException(e.getMessage());
     }
     assert response != null;
     if (response.statusCode() >= 400) {
+      log.error("Error response from server: {}", response.body());
       val errorResponse = new FdVResponse<Error>();
+      errorResponse.setResourcesList(Collections.emptyList());
       errorResponse.setOperationOutcome(buildOperationOutcome(response));
       return (FdVResponse<T>) errorResponse;
     }
+    log.info("Response from server: {}", response.body());
     val resource = deserialize(response.body(), request);
+    log.info("Deserialized response: {}", resource);
     val fdvResponse = new FdVResponse<T>();
     fdvResponse.setResourcesList(resource);
     return fdvResponse;
@@ -136,26 +147,6 @@ public class RemoteFdVClient {
     } else {
       return Collections.emptyList();
     }
-    // TODO refactor this method
-    /*if (request.getType().equals(String.class)) {
-      val list = List.of(response);
-      return (List<T>) list;
-    } else if (request.getType().equals(Consent.class)) {
-      val jsonObject = new JSONObject(response);
-      val jsonArray = new JSONArray();
-      jsonArray.put(jsonObject);
-        try {
-            return objectMapper.readValue(jsonArray.toString(), request.getTypeReference());
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-    } else {
-      try {
-        return objectMapper.readValue(response, request.getTypeReference());
-      } catch (JsonProcessingException e) {
-        throw new RuntimeException(e);
-      }
-    }*/
   }
 
   public Error buildOperationOutcome(HttpResponse<String> response) {

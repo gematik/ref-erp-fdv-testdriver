@@ -23,9 +23,6 @@ package de.gematik.test.erezept.remotefdv.server.mapping;
 import de.gematik.erezept.remotefdv.api.model.*;
 import de.gematik.test.erezept.fhir.r4.erp.ErxTask;
 import de.gematik.test.erezept.fhir.r4.kbv.KbvErpBundle;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.val;
@@ -82,9 +79,9 @@ public class PrescriptionDataMapper {
 
   private static void setBaseFields(Prescription prescription, ErxTask task) {
     prescription.setPrescriptionId(task.getPrescriptionId().getValue());
-    prescription.setAuthoredOn(formatToUTC(task.getAuthoredOn()));
-    prescription.setAcceptDate(formatToUTC(task.getAcceptDate()));
-    prescription.setExpiryDate(formatToUTC(task.getExpiryDate()));
+    prescription.setAuthoredOn(DataMapperUtils.formatToUTCString(task.getAuthoredOn()));
+    prescription.setAcceptDate(DataMapperUtils.formatToUTCString(task.getAcceptDate()));
+    prescription.setExpiryDate(DataMapperUtils.formatToUTCString(task.getExpiryDate()));
     prescription.setStatus(Prescription.StatusEnum.fromValue(task.getStatus().toCode()));
     prescription.setWorkFlow(WorkFlow.fromValue(task.getFlowType().getCode()));
 
@@ -92,11 +89,5 @@ public class PrescriptionDataMapper {
     lastMedDispense.ifPresent(
         instant -> prescription.setLastMedicationDispense(instant.toString()));
     prescription.setEuRedeemableByProperties(true); // TODO find this parameter from ErxTask
-  }
-
-  private static String formatToUTC(Date date) {
-    val instant = date.toInstant();
-    val odt = instant.atOffset(ZoneOffset.UTC);
-    return odt.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
   }
 }

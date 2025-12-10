@@ -20,21 +20,29 @@
 
 package de.gematik.test.erezept.remotefdv.server.mapping;
 
-import de.gematik.erezept.remotefdv.api.model.Consent;
-import de.gematik.erezept.remotefdv.api.model.ConsentCategory;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
-import lombok.val;
+import static org.junit.jupiter.api.Assertions.*;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class ConsentDataMapper {
-  public static Consent from(org.hl7.fhir.r4.model.Consent consent) {
-    val consentDto = new Consent();
-    val kvnr = consent.getPatient().getIdentifier().getValue();
-    val category = consent.getCategoryFirstRep().getCodingFirstRep().getCode();
-    consentDto.setDateTime(DataMapperUtils.formatToUTCString(consent.getDateTime()));
-    consentDto.setKvnr(kvnr);
-    consentDto.setCategory(ConsentCategory.valueOf(category));
-    return consentDto;
+import de.gematik.bbriccs.fhir.de.value.KVNR;
+import de.gematik.erezept.remotefdv.api.model.ConsentCategory;
+import de.gematik.test.erezept.fhir.builder.eu.EuConsentBuilder;
+import lombok.val;
+import org.hl7.fhir.r4.model.Consent.ConsentState;
+import org.junit.jupiter.api.Test;
+
+class ConsentDataMapperTest {
+  @Test
+  void convertsErxConsentToConsentDto() {
+    val consent =
+        EuConsentBuilder.forKvnr(KVNR.from("X123456789")).status(ConsentState.ACTIVE).build();
+    val result = ConsentDataMapper.from(consent);
+
+    assertEquals(ConsentCategory.EUDISPCONS, result.getCategory());
+    assertNotNull(result.getDateTime());
+    assertTrue(result.getDateTime().matches("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z"));
+  }
+
+  @Test
+  void handlesNullErxConsent() {
+    assertThrows(NullPointerException.class, () -> ConsentDataMapper.from(null));
   }
 }

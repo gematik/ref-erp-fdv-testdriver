@@ -1,0 +1,10 @@
+include::attributes-settings.adoc[]
+
+= {app-name}
+{author}
+[VERSION], {docdate}
+:toc: left
+:docinfo: shared
+
+
+include::sections/index.adoc[leveloffset=+1]

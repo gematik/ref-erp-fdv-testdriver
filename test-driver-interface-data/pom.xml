@@ -6,44 +6,29 @@
     <parent>
         <groupId>de.gematik.erezept.remotefdv</groupId>
         <artifactId>erp-fdv-test-driver-interface</artifactId>
-        <version>1.1.1</version>
+        <version>1.1.2</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>test-driver-interface-data</artifactId>
     <name>Test Driver Interface Data</name>
     <description>TDI Data contains generated classes from OpenAPI specification in target directory</description>
 
-    <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
     <build>
         <plugins>
             <plugin>
                 <groupId>org.openapitools</groupId>
                 <artifactId>openapi-generator-maven-plugin</artifactId>
-                <!--RELEASE_VERSION-->
-                <version>7.10.0</version>
-                <!--/RELEASE_VERSION-->
                 <executions>
                     <execution>
                         <goals>
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>openapi/v2.0.0/ErpTestDriver.yaml</inputSpec>
-                            <generatorName>jaxrs-jersey</generatorName>
-                            <output>${project.build.directory}/generated-sources</output>
-                            <apiPackage>de.gematik.erezept.remotefdv.api.api</apiPackage>
-                            <modelPackage>de.gematik.erezept.remotefdv.api.model</modelPackage>
                             <generateApis>false</generateApis>
                             <generateSupportingFiles>false</generateSupportingFiles>
                             <typeMappings>UUID=String,CommunicationSender=String,CommunicationReference=String,Date=String,NameEnum=String,ServiceUrlEnum=String,PharmacistIdentifier=String
                             </typeMappings>
-                            <configOptions>
-                                <sourceFolder>src/main/java</sourceFolder>
-                            </configOptions>
                         </configuration>
                     </execution>
                 </executions>
@@ -61,8 +46,6 @@
         <dependency>
             <groupId>io.swagger</groupId>
             <artifactId>swagger-annotations</artifactId>
-            <version>1.6.11</version>
         </dependency>
     </dependencies>
-
 </project>

@@ -1,0 +1,134 @@
+include::./attributes-sections.adoc[]
+
+== E-Rezept FdV TDI - Quick Start
+The TDI (Test Driver Interface) is a lightweight service that acts as a remote control for E-Rezept applications. It enables automated interaction, testing, and orchestration of E-Rezept workflows, making it easy to simulate user actions and system events for development and quality assurance.
+
+=== Prerequisites
+- Java 17+ (JDK)
+- Maven 3.9+
+- Git
+- Docker (optional, for containerized deployment)
+- virtual eGK certificates (link:https://gematik.github.io/lib-bbriccs/Bbriccs-User-Manual.html#_smartcard_archiv[Smartcards archive])
+
+=== Source Code
+
+[WARNING]
+The repository name differs between GitHub and GitLab. On GitHub, it is `ref-erp-fdv-testdriver`, while on GitLab it is `fdv-test-driver-interface`. Make sure to use the correct name when cloning from each platform.
+
+Clone the repository either from link:https://github.com/gematik/ref-erp-fdv-testdriver[GitHub]
+
+[source,shell]
+----
+git clone https://github.com/gematik/ref-erp-fdv-testdriver.git
+cd ref-erp-fdv-testdriver
+----
+
+or from link:https://gitlab.prod.ccs.gematik.solutions/e-rezept/fdv-test-driver-interface[gematik GitLab]
+
+[WARNING]
+private repository, requires access rights
+
+[source,shell]
+----
+git clone git@gitlab.prod.ccs.gematik.solutions:e-rezept/fdv-test-driver-interface.git
+cd fdv-test-driver-interface
+----
+
+=== Build and run from source
+To build the distributable JAR file, use the following Maven command.
+This command cleans the project, compiles the source code, and packages it
+into a self-contained JAR file with all dependencies included.
+The `-Pdist` flag activates the Maven profile for distribution.
+
+[source,shell]
+----
+mvn clean install -Pdist -Dskip.inttests
+----
+
+Run the generated JAR:
+
+[source,shell]
+----
+java -jar test-driver-interface-server/target/tdi-server-jar-with-dependencies.jar
+----
+
+That's it! The service should now be running.
+
+
+=== Build and run with Docker
+If you prefer to use Docker, you can build and run the TDI service in a Docker container. This approach encapsulates the application and its dependencies, making it easier to deploy and manage.
+
+[source,shell]
+----
+mvn clean install -Pdist -Dskip.inttests
+----
+
+[source,shell]
+----
+cd test-driver-interface-server
+docker build -t erp-fdv-tdi .
+----
+
+The image can now be started with the following command using link:https://docs.docker.com/engine/reference/commandline/run/[docker run]:
+
+[source,shell,subs="attributes"]
+----
+docker run --name {app-name-cli} \
+      -p [HOST_PORT]:8080 \
+      --env SMARTCARDS_CONFIG_PATH=[PATH_ON_CONTAINER] \
+      -v [PATH_ON_HOST]:[PATH_ON_CONTAINER] \
+      erp-fdv-tdi
+----
+
+- The container `--name {app-name-cli}` can be freely chosen
+- The exposed `[HOST_PORT]` can be freely chosen to you preferences
+- With `--env SMARTCARDS_CONFIG_PATH=[PATH_ON_CONTAINER]` the {app-name} is instructed to read the link:https://gematik.github.io/lib-bbriccs/Bbriccs-User-Manual.html#_smartcard_archiv[Smartcards archive] from the given `[PATH_ON_CONTAINER]`
+- With `-v [PATH_ON_HOST]:[PATH_ON_CONTAINER]` a link:https://docs.docker.com/storage/volumes/[Volume] is included in the container (quasi a shared folder between the container and the host computer) to enable the exchange of files between the container and the host computer. If this is not required, this argument can also be omitted.
+
+So a concrete example might look similar to:
+
+[source,shell,subs="attributes"]
+----
+docker run --name {app-name-cli} \
+      -p 8080:8080 \
+      --env SMARTCARDS_CONFIG_PATH=/app/my_smartcards \
+      -v /home/user/my_smartcards:/app/my_smartcards \
+      erp-fdv-tdi
+----
+
+== Smoketest your TDI setup
+To verify that your TDI setup is functioning correctly, you can run a smoke test using one of the following approaches:
+
+Run the integration test for connecting to a local server:
+
+[source,shell]
+----
+mvn verify -Dit.test=RemoteFdVIT#shouldConnectWithLocalServer -f test-driver-interface-client/pom.xml
+----
+
+or use curl to perform the steps manually:
+
+[source,shell]
+----
+curl -X 'PUT' \
+  'http://localhost:8080/erp/testdriver/api/v1/start' \
+  -H 'Authorization: apiKey2024' | jq .
+----
+
+[source,shell]
+----
+kvnr='X110670787'
+curl -X 'PUT' \
+  'http://localhost:8080/erp/testdriver/api/v1/login' \
+  -H 'Authorization: apiKey2024' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d "$kvnr" | jq .
+----
+
+[source,shell]
+----
+curl -X 'GET' \
+  'http://localhost:8080/erp/testdriver/api/v1/info' \
+  -H 'Authorization: apiKey2024' | jq .
+----

@@ -39,6 +39,7 @@ import de.gematik.test.erezept.client.usecases.search.TaskSearch;
 import de.gematik.test.erezept.fhir.builder.erp.ErxCommunicationBuilder;
 import de.gematik.test.erezept.fhir.builder.eu.EuPatchTaskInputBuilder;
 import de.gematik.test.erezept.fhir.extensions.erp.SupplyOptionsType;
+import de.gematik.test.erezept.fhir.profiles.version.ErpWorkflowVersion;
 import de.gematik.test.erezept.fhir.values.AccessCode;
 import de.gematik.test.erezept.fhir.values.EuAccessCode;
 import de.gematik.test.erezept.fhir.values.TaskId;
@@ -50,22 +51,19 @@ import de.gematik.test.erezept.remotefdv.server.config.TestFdVFactory;
 import de.gematik.test.erezept.remotefdv.server.exceptions.NoSuchEnvironmentException;
 import de.gematik.test.erezept.remotefdv.server.mapping.*;
 import de.gematik.test.erezept.remotefdv.server.search.MedicationDispenseSearch;
-import de.gematik.test.erezept.screenplay.util.DataMatrixCodeGenerator;
-
-import java.lang.System;
 import java.math.BigDecimal;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.List;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import kong.unirest.core.json.JSONException;
 import kong.unirest.core.json.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.apache.commons.lang3.StringUtils;
 
 @Slf4j
 @javax.annotation.Generated(
@@ -207,29 +205,38 @@ public class ErpApiServiceImpl extends ErpApiService {
           .build();
     }
     String configPath =
-        System.getenv()
+        java.lang.System.getenv()
             .getOrDefault(
                 "CONFIG_PATH",
                 "test-driver-interface-server/src/main/java/de/gematik/test/erezept/remotefdv/server/config/config.yaml");
     try {
       mcf = TestFdVFactory.loadConfig(configPath);
       egk = mcf.getEgkByKvnr(kvnr);
+
       erpClient = mcf.createErpClientForPatient(kvnr, patient);
     } catch (NoSuchEnvironmentException | CardNotFoundException ex) {
+      log.error(ex.getMessage());
       return Response.status(400)
           .entity(new ApiResponseMessage(ApiResponseMessage.ERROR, ex.getMessage()))
           .build();
     } catch (Exception ex) {
+      log.error(ex.getMessage());
       return Response.status(500)
           .entity(new ApiResponseMessage(ApiResponseMessage.ERROR, ex.getMessage()))
           .build();
     }
+
+    val env = mcf.getActiveEnvConfig();
+    log.info(
+        "Using eGK with KVNR {} for connection to {} ({})",
+        egk.getKvnr(),
+        env.getName(),
+        env.getInternet().getFdBaseUrl());
     erpClient.authenticateWith(egk);
     LoginSuccess loginSuccess = new LoginSuccess();
     accessToken = erpClient.getAuthentication().get().getAccessToken().getRawString();
     loginSuccess.setAccessToken(accessToken);
-    val dtos = List.of(loginSuccess);
-    return Response.ok().entity(dtos).build();
+    return Response.ok().entity(loginSuccess).build();
   }
 
   @Override
@@ -336,7 +343,8 @@ public class ErpApiServiceImpl extends ErpApiService {
     if (res.isOperationOutcome() || res.getStatusCode() > 299) {
       return buildOperationOutcomeDto(res);
     }
-    val accessCode = res.getExpectedResource().getTask().getAccessCode().getValue();
+    val task = res.getExpectedResource().getTask();
+    val accessCode = task.getAccessCode().getValue();
     try {
       telematikId = object.get("telematikId").toString();
     } catch (JSONException e) {
@@ -344,15 +352,12 @@ public class ErpApiServiceImpl extends ErpApiService {
           .entity(new ApiResponseMessage(ApiResponseMessage.ERROR, "Entry telematikId is required"))
           .build();
     }
-    /*val erxCommunication =
-    ErxCommunicationBuilder.builder()
-        .basedOnTask(taskId, accessCode)
-        .recipient(telematikId)
-        .buildDispReq(dispReqMessage);*/
     val erxCommunication =
         ErxCommunicationBuilder.forDispenseRequest(dispReqMessage)
             .basedOn(taskId, accessCode)
             .receiver(telematikId)
+            .flowType(task.getFlowType())
+            .version(ErpWorkflowVersion.V1_4)
             .build();
 
     val response = patient.erpRequest(new CommunicationPostCommand(erxCommunication));
@@ -361,7 +366,7 @@ public class ErpApiServiceImpl extends ErpApiService {
     }
     val resource = response.getExpectedResource();
     val communication = CommunicationDataMapper.from(resource);
-    return responseBuilder.entity(List.of(communication)).build();
+    return responseBuilder.entity(communication).build();
   }
 
   @Override
@@ -428,23 +433,18 @@ public class ErpApiServiceImpl extends ErpApiService {
     val kbvBundle = response.getExpectedResource().getKbvBundle().get();
     val prescription =
         PrescriptionDataMapper.from(response.getExpectedResource().getTask(), kbvBundle);
-    return responseBuilder.entity(List.of(prescription)).build();
+    return responseBuilder.entity(prescription).build();
   }
 
   @Override
   public Response erpTestdriverApiV1StartPut(SecurityContext securityContext)
       throws NotFoundException {
-    if (patient != null) {
-      return Response.status(400)
-          .entity(new ApiResponseMessage(ApiResponseMessage.ERROR, "Test-FdV is already running"))
-          .build();
+    if (patient == null) {
+      patient = new Patient();
+      val zonedDateTime = ZonedDateTime.now(ZoneId.of("UTC"));
+      DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
+      startTime = zonedDateTime.format(formatter);
     }
-    patient = new Patient();
-    val zonedDateTime = ZonedDateTime.now(ZoneId.of("UTC"));
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
-    startTime = zonedDateTime.format(formatter);
-    log.info("WORKING_DIRECTORY: " + System.getProperty("user.dir"));
-
     return Response.ok()
         .entity(new ApiResponseMessage(ApiResponseMessage.OK, "Test-FdV is running"))
         .build();
@@ -453,14 +453,10 @@ public class ErpApiServiceImpl extends ErpApiService {
   @Override
   public Response erpTestdriverApiV1StopPut(SecurityContext securityContext)
       throws NotFoundException {
-    if (patient == null) {
-      return Response.status(400)
-          .entity(
-              new ApiResponseMessage(ApiResponseMessage.ERROR, "Test-FdV is already not running"))
-          .build();
+    if (patient != null) {
+      patient = null;
+      erpClient = null;
     }
-    patient = null;
-    erpClient = null;
     return Response.ok()
         .entity(new ApiResponseMessage(ApiResponseMessage.OK, "Test-FdV is not running"))
         .build();
@@ -538,7 +534,7 @@ public class ErpApiServiceImpl extends ErpApiService {
                     ApiResponseMessage.ERROR, "Consent not found for current patient and category"))
             .build();
       }
-      val consentDto = ConsentDataMapper.from(consent);
+      val consentDto = ConsentDataMapper.from(consent.orElseThrow());
       consentDto.setCategory(category);
       return responseBuilder.entity(consentDto).build();
     } else {
@@ -567,7 +563,8 @@ public class ErpApiServiceImpl extends ErpApiService {
     if (responseBuilder.build().getStatus() >= 400) {
       return responseBuilder.build();
     }
-    val euAccessCode = EuAccessCode.from(accessCode);
+    val euAccessCode =
+        StringUtils.isNotBlank(accessCode) ? EuAccessCode.from(accessCode) : EuAccessCode.random();
     val isoCountryCode = IsoCountryCode.valueOf(country);
     val response = patient.erpRequest(new EuGrantAccessPostCommand(euAccessCode, isoCountryCode));
     if (response.isOperationOutcome()) {

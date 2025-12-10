@@ -14,7 +14,10 @@
 
 ## About The Project
 
-E-Rezept FdV Test Driver Interface provides a server and a client to test RemoteFdVs
+E-Rezept FdV Test Driver Interface provides a server and a client to test RemoteFdVs.
+The server can be started as a standalone application and exposes REST endpoints to control the behavior of connected E-Rezept applications (RemoteFdVs). The client can be used to interact with the server programmatically, allowing for automated testing and orchestration of E-Rezept workflows.
+
+see the [Quitstart Guide](adocs/sections/index.adoc) for instructions on how to build and run the service.
 
 ### Release Notes
 

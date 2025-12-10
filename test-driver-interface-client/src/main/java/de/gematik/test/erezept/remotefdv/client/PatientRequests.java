@@ -20,9 +20,11 @@
 
 package de.gematik.test.erezept.remotefdv.client;
 
+import de.gematik.erezept.remotefdv.api.model.ConsentCategory;
 import de.gematik.test.erezept.remotefdv.client.requests.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.NotImplementedException;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class PatientRequests {
@@ -59,8 +61,7 @@ public class PatientRequests {
   }
 
   public static String getPharmacy() {
-    // TODO not implemented yet
-    return null;
+    throw new NotImplementedException("Not implemented yet");
   }
 
   public static PharmacyAssignment assignToPharmacy(
@@ -80,15 +81,15 @@ public class PatientRequests {
     return new DeleteCommunicationById(prescriptionId);
   }
 
-  public static PostConsent postConsent(String category) {
+  public static PostConsent postConsent(ConsentCategory category) {
     return new PostConsent(category);
   }
 
-  public static GetConsent getConsent(String category) {
+  public static GetConsent getConsent(ConsentCategory category) {
     return new GetConsent(category);
   }
 
-  public static DeleteConsent deleteConsent(String category) {
+  public static DeleteConsent deleteConsent(ConsentCategory category) {
     return new DeleteConsent(category);
   }
 

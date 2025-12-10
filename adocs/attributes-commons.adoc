@@ -1,0 +1,6 @@
+
+:author: gematik GmbH
+:orgname: {author}
+
+:app-name: pass:c,q[_E-Rezept FdV TDI_]
+:app-name-cli: erp-fdv-tdi

@@ -20,22 +20,35 @@
 
 package de.gematik.test.erezept.remotefdv.client;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.junit.jupiter.api.Test;
 
 @Slf4j
-public class RemoteFdVIT {
+class RemoteFdVIT {
+
+  private static final RemoteFdVClient client =
+      RemoteFdVClient.builder().forRemote("http://localhost:8080").apiKey("apiKey2024").build();
+  private static final String KVNR = "X110609524";
+
+  @Test
+  void shouldConnectWithLocalServer() {
+    val startRsp = client.sendRequest(PatientRequests.startFdV());
+    assertTrue(startRsp.getResourceOptional().isPresent(), "Unexpected response from FdV Server");
+
+    val loginRsp = client.sendRequest(PatientRequests.loginWithKvnr(KVNR));
+    log.info("AccessToken: {}", loginRsp.getExpectedResource().getAccessToken());
+  }
+
   @Test
   @SneakyThrows
   void shouldRunAgainstLocalServer() {
-    val client =
-        RemoteFdVClient.builder().forRemote("http://localhost:8080").apiKey("apiKey2024").build();
-
     val response = client.sendRequest(PatientRequests.startFdV());
-    log.info(response.getExpectedResource().toString());
-    val response1 = client.sendRequest(PatientRequests.loginWithKvnr("X110645443"));
+    log.info(response.getExpectedResource());
+    val response1 = client.sendRequest(PatientRequests.loginWithKvnr(KVNR));
     log.info(response1.getExpectedResource().toString());
     val response2 = client.sendRequest(PatientRequests.getAuditEvents());
     log.info(response2.getExpectedResource().toString());

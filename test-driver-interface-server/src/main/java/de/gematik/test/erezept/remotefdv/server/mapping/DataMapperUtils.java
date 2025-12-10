@@ -20,21 +20,15 @@
 
 package de.gematik.test.erezept.remotefdv.server.mapping;
 
-import de.gematik.erezept.remotefdv.api.model.Consent;
-import de.gematik.erezept.remotefdv.api.model.ConsentCategory;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
-import lombok.val;
+public class DataMapperUtils {
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class ConsentDataMapper {
-  public static Consent from(org.hl7.fhir.r4.model.Consent consent) {
-    val consentDto = new Consent();
-    val kvnr = consent.getPatient().getIdentifier().getValue();
-    val category = consent.getCategoryFirstRep().getCodingFirstRep().getCode();
-    consentDto.setDateTime(DataMapperUtils.formatToUTCString(consent.getDateTime()));
-    consentDto.setKvnr(kvnr);
-    consentDto.setCategory(ConsentCategory.valueOf(category));
-    return consentDto;
+  private DataMapperUtils() {
+    throw new IllegalStateException("Do not instantiate utility class");
+  }
+
+  public static String formatToUTCString(java.util.Date date) {
+    var instant = date.toInstant();
+    var odt = instant.atOffset(java.time.ZoneOffset.UTC);
+    return odt.format(java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME);
   }
 }
