@@ -27,3 +27,13 @@ components:
       type: string
       enum: [ "CHARGCONS", "EUDISPCONS" ]
       example: "CHARGCONS"
+  examples:
+    consentExists:
+      description: "Consent already exists for the specified category and kvnr"
+      summary: "Consent already exists"
+      value:
+        statusCode: 409
+        details: "EUDISPCONS consent already exists for this kvnr"
+        code: "conflict"
+        errorCode: "-"
+        diagnostics: "-"

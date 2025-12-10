@@ -1,0 +1,26 @@
+import http-client.env.json
+
+@kvnr = X110366628
+
+### START-01
+# start the FdV Simulator
+PUT {{host}}/start
+Authorization: {{apikey}}
+
+### LOGIN-01
+# login to the FdV Simulator with a given KVNR
+PUT {{host}}/login
+Authorization: {{apikey}}
+
+{{kvnr}}
+
+### INFO-01
+# read information about the FdV Simulator
+GET {{host}}/info
+Authorization: {{apikey}}
+
+### STOP-01
+# stop the FdV Simulator
+PUT {{host}}/stop
+#Content-Type: application/json
+Authorization: {{apikey}}

@@ -20,22 +20,8 @@
 
 package de.gematik.test.erezept.remotefdv.client;
 
-import java.util.HashMap;
-import lombok.Getter;
-import lombok.Setter;
-
-@Setter
-@Getter
-public class HttpRequestInfo {
-  private String host;
-  private String apiKey;
-  private String method;
-  private String resource;
-  private String body;
-  private String resourceId;
-  private HashMap<String, String> query = new HashMap<>();
-
-  public void setParameters(String key, String value) {
-    query.put(key, value);
+public class RemoteFdVErrorException extends RuntimeException {
+  public RemoteFdVErrorException(String message) {
+    super(message);
   }
 }

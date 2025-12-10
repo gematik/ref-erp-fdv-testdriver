@@ -13,6 +13,9 @@
 *.ipa
 *.xcarchive
 *.pcs
+/adocs/user_manual.html
+/adocs/user_manual.pdf
+
 COPYRIGHT_HEADER
 Jenkinsfile
 *.Jenkinsfile

@@ -30,7 +30,7 @@ import lombok.val;
 public class EuAccessAuthorizationMapper {
   public static EUAccessAuthorization from(EuAccessPermission permission) {
     val euAccessAuthDto = new EUAccessAuthorization();
-    euAccessAuthDto.setAccessCode(permission.getAccessPermissionCode());
+    euAccessAuthDto.setAccessCode(permission.getAccessCode().getValue());
     euAccessAuthDto.setCountry(permission.getIsoCountryCode().getCode());
     val createdAt = permission.getCreateAt();
     createdAt.ifPresent(instant -> euAccessAuthDto.setCreatedAt(instant.toString()));

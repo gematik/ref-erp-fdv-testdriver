@@ -36,6 +36,8 @@ ARG GROUP=tdi_server
 #ARG USER_HOME=/home/$USER
 ARG GID=23456
 
+COPY --chmod=a+x docker-entrypoint.sh docker-entrypoint.sh
+
 RUN adduser \
     --disabled-password \
     --gecos "" \
@@ -55,18 +57,17 @@ COPY src/main/java/de/gematik/test/erezept/remotefdv/server/config/config.yaml c
 COPY src/main/java/de/gematik/test/erezept/remotefdv/server/config/secret.ppcs secret.ppcs
 COPY smartcards-fdv smartcards/
 
-ENV HTTP_PROXY=""
-ENV HTTPS_PROXY=""
+ENV HTTPS_PROXY_HOST=""
+ENV HTTPS_PROXY_PORT=""
+
 ENV WEBAPP=/app/webapp
 ENV CONFIG_PATH=/app/config.yaml
 ENV SMARTCARDS_CONFIG_PATH=/app/smartcards
 #Environment where RemoteFdV Server should be started. Is overwritten by Jenkins pipeline
 ENV TI_ENV=RU
 
-EXPOSE 8085
-## Entry point for running Docker container on LTU machines
-## (proxy as gateway to internet because LTUs do not have direct access to internet)
-ENTRYPOINT [ "java","-Djdk.tls.namedGroups=secp256r1,secp384r1,ffdhe2048,ffdhe3072", "-Dhttps.proxyHost=10.11.98.2", "-Dhttps.proxyPort=3128", "-jar", "app.jar" ]
-## Entry point for running Docker container on local machine
-#ENTRYPOINT [ "java", "-Djdk.tls.namedGroups=secp256r1,secp384r1,ffdhe2048,ffdhe3072", "-jar", "app.jar" ]
+EXPOSE 8080
+
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
+
 

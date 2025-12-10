@@ -12,7 +12,7 @@ info:
     url: https://www.apache.org/licenses/LICENSE-2.0
 servers:
   - url: https://localhost:443
-    variables: {}
+    variables: { }
     description: ERP Modul Testinterface
 
 tags:
@@ -293,6 +293,15 @@ paths:
           $ref: "./v1-commons.yaml#/components/responses/Forbidden"
         400:
           $ref: "./v1-commons.yaml#/components/responses/TestFdVError"
+        409:
+          description: "Consent could not be created due to a conflict"
+          content:
+            application/json:
+              schema:
+                $ref: "./v1-commons.yaml#/components/schemas/OperationOutcome"
+              examples:
+                consentExists:
+                  $ref: "./v1-consent.yaml#/components/examples/consentExists"
     delete:
       summary: "Operation to delete a consent for a patient by category"
       tags:
@@ -328,7 +337,7 @@ paths:
         403:
           $ref: "./v1-commons.yaml#/components/responses/Forbidden"
         404:
-            description: "Consent not found for current patient and category"
+          description: "Consent not found for current patient and category"
         400:
           $ref: "./v1-commons.yaml#/components/responses/TestFdVError"
   /erp/testdriver/api/v1/eu-access-authorization:
@@ -387,4 +396,4 @@ components:
       in: header
 
 security:
-  - apiKey: []
+  - apiKey: [ ]

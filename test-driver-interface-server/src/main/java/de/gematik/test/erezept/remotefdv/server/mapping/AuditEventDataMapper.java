@@ -22,8 +22,6 @@ package de.gematik.test.erezept.remotefdv.server.mapping;
 
 import de.gematik.erezept.remotefdv.api.model.AuditEvent;
 import de.gematik.test.erezept.fhir.r4.erp.ErxAuditEvent;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.val;
@@ -33,10 +31,7 @@ public class AuditEventDataMapper {
 
   public static AuditEvent from(ErxAuditEvent erxAuditEvent) {
     val auditEvent = new AuditEvent();
-    val instant = erxAuditEvent.getRecorded().toInstant();
-    val odt = instant.atOffset(ZoneOffset.UTC);
-    val recordedUTC = odt.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-    auditEvent.setRecorded(recordedUTC);
+    auditEvent.setRecorded(DataMapperUtils.formatToUTCString(erxAuditEvent.getRecorded()));
     auditEvent.setText(erxAuditEvent.getFirstText());
     if (erxAuditEvent.getPrescriptionId().isPresent()) {
       auditEvent.setPrescriptionId(erxAuditEvent.getPrescriptionId().get().getValue());

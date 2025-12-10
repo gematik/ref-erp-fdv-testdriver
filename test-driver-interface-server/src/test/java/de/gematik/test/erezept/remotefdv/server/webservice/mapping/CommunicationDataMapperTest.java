@@ -62,12 +62,22 @@ class CommunicationDataMapperTest {
   }
 
   @ParameterizedTest
-  @EnumSource(CommunicationType.class)
+  @EnumSource(
+      value = CommunicationType.class,
+      mode = EnumSource.Mode.EXCLUDE,
+      names = {"DIGA"})
   void shouldCreateCommunicationWithType(CommunicationType type) {
     when(def.toString()).thenReturn(type.toString());
     val result = assertDoesNotThrow(() -> CommunicationDataMapper.from(erxCommunication));
     assertEquals(SupplyOptionsType.SHIPMENT, result.getSupplyOptionsType());
     assertEquals(type.name(), result.getType().name());
+  }
+
+  @Test
+  void shouldThrowOnDigaBecauseNotYetImplemented() {
+    when(def.toString()).thenReturn("DIGA");
+    assertThrows(
+        IllegalArgumentException.class, () -> CommunicationDataMapper.from(erxCommunication));
   }
 
   @Test

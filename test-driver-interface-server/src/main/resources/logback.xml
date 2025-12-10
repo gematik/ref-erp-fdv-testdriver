@@ -10,16 +10,31 @@
 
     <appender name="STDOUT" class="ConsoleAppender">
         <encoder class="PatternLayoutEncoder">
-            <pattern>${date_format} [%thread] %highlight(%-5level) %logger{6} - %msg%n</pattern>
+            <pattern>${date_format} %highlight(%-5level) [%thread] %logger{5} - %msg%n</pattern>
         </encoder>
     </appender>
 
 
+    <logger name="de.gematik.test.erezept.remotefdv" level="INFO" additivity="false">
+        <appender-ref ref="STDOUT"/>
+    </logger>
     <logger name="de.gematik.test.erezept.client" level="TRACE" additivity="false">
         <appender-ref ref="STDOUT"/>
     </logger>
+    <logger name="de.gematik.bbriccs" level="INFO" additivity="false">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+    <logger name="de.gematik.bbriccs.smartcards" level="TRACE" additivity="false">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+    <logger name="org.eclipse.jetty" level="INFO" additivity="false">
+        <appender-ref ref="STDOUT"/>
+    </logger>
 
-    <root level="WARNING">
+    <!-- turn off some noisy loggers -->
+    <logger name="ca.uhn.fhir.parser.LenientErrorHandler" level="OFF"/>
+
+    <root level="WARN">
         <appender-ref ref="STDOUT"/>
     </root>
 </configuration>

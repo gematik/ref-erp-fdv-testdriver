@@ -23,8 +23,7 @@ package de.gematik.test.erezept.remotefdv.server.mapping;
 import de.gematik.erezept.remotefdv.api.model.Communication;
 import de.gematik.erezept.remotefdv.api.model.SupplyOptionsType;
 import de.gematik.test.erezept.fhir.r4.erp.ErxCommunication;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
+import de.gematik.test.erezept.fhir.r4.erp.ICommunicationType;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.val;
@@ -38,30 +37,36 @@ public class CommunicationDataMapper {
     com.setReference(resource.getBasedOnReferenceId().getValue());
     com.setSender(resource.getSenderId());
     com.setRecipient(resource.getRecipientId());
-    val instant = resource.getSent().toInstant();
-    val odt = instant.atOffset(ZoneOffset.UTC);
-    val sentUTC = odt.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-    com.setSent(sentUTC);
-    SupplyOptionsType supplyOptionsType = SupplyOptionsType.DELIVERY;
-    if (resource.getMessage().contains("onPremise")) {
-      supplyOptionsType = SupplyOptionsType.ON_PREMISE;
-    } else if (resource.getMessage().contains("shipment")) {
-      supplyOptionsType = SupplyOptionsType.SHIPMENT;
-    }
-    com.setSupplyOptionsType(supplyOptionsType);
-
-    Communication.TypeEnum type = Communication.TypeEnum.REPRESENTATIVE;
-
-    if (resource.getType() != null) {
-      if (resource.getType().getType().toString().contains("DISP_REQ")) {
-        type = Communication.TypeEnum.DISP_REQ;
-      } else if (resource.getType().getType().toString().contains("INFO_REQ")) {
-        type = Communication.TypeEnum.INFO_REQ;
-      } else if (resource.getType().getType().toString().contains("REPLY")) {
-        type = Communication.TypeEnum.REPLY;
-      }
-      com.setType(type);
-    }
+    com.setSent(DataMapperUtils.formatToUTCString(resource.getSent()));
+    com.setSupplyOptionsType(determineSupplyOptionsType(resource.getMessage()));
+    com.setType(determineCommunicationType(resource.getType()));
     return com;
+  }
+
+  private static SupplyOptionsType determineSupplyOptionsType(String message) {
+    if (message.contains("onPremise")) {
+      return SupplyOptionsType.ON_PREMISE;
+    } else if (message.contains("shipment")) {
+      return SupplyOptionsType.SHIPMENT;
+    }
+    return SupplyOptionsType.DELIVERY;
+  }
+
+  private static Communication.TypeEnum determineCommunicationType(ICommunicationType type) {
+    if (type == null) {
+      return Communication.TypeEnum.REPRESENTATIVE;
+    }
+
+    String typeString = type.getType().toString();
+    if (typeString.contains("DISP_REQ")) {
+      return Communication.TypeEnum.DISP_REQ;
+    } else if (typeString.contains("INFO_REQ")) {
+      return Communication.TypeEnum.INFO_REQ;
+    } else if (typeString.contains("REPLY")) {
+      return Communication.TypeEnum.REPLY;
+    } else if (typeString.contains("DIGA")) {
+      throw new IllegalArgumentException("DIGA communication type is not supported in Remote FDV");
+    }
+    return Communication.TypeEnum.REPRESENTATIVE;
   }
 }

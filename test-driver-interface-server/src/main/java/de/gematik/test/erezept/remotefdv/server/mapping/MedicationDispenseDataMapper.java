@@ -26,8 +26,6 @@ import de.gematik.erezept.remotefdv.api.model.Pharmacist;
 import de.gematik.test.erezept.fhir.r4.erp.ErxMedicationDispense;
 import de.gematik.test.erezept.fhir.r4.erp.GemErpMedication;
 import de.gematik.test.erezept.fhir.r4.kbv.KbvErpMedication;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.val;
@@ -66,13 +64,11 @@ public class MedicationDispenseDataMapper {
   private static MedicationDispense createMedDispense(
       ErxMedicationDispense erxMedDispense, Medication medication) {
     val medDispense = new MedicationDispense();
-    val instant = erxMedDispense.getWhenHandedOver().toInstant();
-    val odt = instant.atOffset(ZoneOffset.UTC);
-    val whenHandedOverUTC = odt.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
     val pharmacist = new Pharmacist();
     pharmacist.setName(erxMedDispense.getPerformerFirstRep().toString());
     pharmacist.setIdentifier(erxMedDispense.getPerformerIdFirstRep());
-    medDispense.setWhenhandedover(whenHandedOverUTC);
+    medDispense.setWhenhandedover(
+        DataMapperUtils.formatToUTCString(erxMedDispense.getWhenHandedOver()));
     medDispense.setPrescriptionId(erxMedDispense.getPrescriptionId().getValue());
     medDispense.setPharmacist(pharmacist);
     medDispense.setMedication(medication);

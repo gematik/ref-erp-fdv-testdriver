@@ -21,33 +21,34 @@
 package de.gematik.test.erezept.remotefdv.client;
 
 import de.gematik.erezept.remotefdv.api.model.Error;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-
 import lombok.Getter;
 import lombok.Setter;
+import lombok.val;
 
 @Setter
 public class FdVResponse<R> {
-  private List<R> resourcesList;
-  private R resource;
+  private List<R> resourcesList = Collections.emptyList();
   private @Getter Error operationOutcome;
 
-  @SuppressWarnings("unchecked")
   public Optional<R> getResourceOptional() {
-    return resource == null ? Optional.empty() : Optional.of(resource);
+    val res = getResourcesListOptional();
+    return res.map(rs -> rs.get(0));
   }
 
-  @SuppressWarnings("unchecked")
   public Optional<List<R>> getResourcesListOptional() {
     return resourcesList.isEmpty() ? Optional.empty() : Optional.of(resourcesList);
   }
 
   public R getExpectedResource() {
-    return getResourceOptional().orElseThrow(() -> new RuntimeException("Missing Resource"));
+    return getResourceOptional()
+        .orElseThrow(() -> new RuntimeException(operationOutcome.getDetails()));
   }
 
   public List<R> getExpectedResourcesList() {
-    return getResourcesListOptional().orElseThrow(() -> new RuntimeException("Missing Resource"));
+    return getResourcesListOptional()
+        .orElseThrow(() -> new RuntimeException(operationOutcome.getDetails()));
   }
 }

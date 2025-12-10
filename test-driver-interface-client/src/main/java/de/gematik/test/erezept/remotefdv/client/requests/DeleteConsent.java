@@ -21,6 +21,7 @@
 package de.gematik.test.erezept.remotefdv.client.requests;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import de.gematik.erezept.remotefdv.api.model.ConsentCategory;
 import de.gematik.test.erezept.remotefdv.client.HttpRequestInfo;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -29,7 +30,7 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public class DeleteConsent implements PatientRequests<String> {
-  private final String category;
+  private final ConsentCategory category;
   private final Class<String> type = String.class;
   private final @Getter TypeReference<List<String>> typeReference = new TypeReference<>() {};
 
@@ -37,6 +38,6 @@ public class DeleteConsent implements PatientRequests<String> {
   public void finalizeRequest(HttpRequestInfo rb) {
     rb.setMethod("DELETE");
     rb.setResource("consent");
-    rb.setParameters("category", category);
+    rb.setParameters("category", category.getValue());
   }
 }

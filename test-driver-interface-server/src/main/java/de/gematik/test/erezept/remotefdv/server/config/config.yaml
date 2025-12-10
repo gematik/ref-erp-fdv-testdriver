@@ -1,4 +1,4 @@
-activeEnvironment: RU-DEV
+activeEnvironment: RU
 
 environments:
   - name: TU
