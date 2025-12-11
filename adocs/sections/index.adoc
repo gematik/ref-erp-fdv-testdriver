@@ -34,6 +34,43 @@ git clone git@gitlab.prod.ccs.gematik.solutions:e-rezept/fdv-test-driver-interfa
 cd fdv-test-driver-interface
 ----
 
+
+=== Adjusting the Insured Identities
+IMPORTANT: You can either use the provided insured identities or request your own from Gematik for your testing purposes. It is important that the certificates match the trust domain of the eHealthCA and are derived from the KOMP-PKI.
+
+The certificates and private keys must be provided as P12 containers.
+An insured identity typically has several different certificates. For authentication with the IDP, the AUT certificates are sufficient.
+To introduce your own test identities, the path to the AUT P12 containers must be specified in the file test-driver-interface-server/smartcards-fdv/smartcards.json.
+
+[source, json]
+----
+[
+  {
+    "iccsn": "80276883110000163961",
+    "note": "IKNR 109500969; valid until Wed Mar 21 23:59:59 UTC 2029",
+    "identifier": "X110609524",
+    "type": "EGK",
+    "ownerName": "Prof. Dr. Gunther Michael HütterTEST-ONLY",
+    "stores": [
+      "egk/80276883110000163961/80276883110000163961-C_CH_AUT_E256.p12",
+      "egk/80276883110000163961/80276883110000163961-C_CH_AUT_R2048.p12"
+    ]
+  }
+]
+----
+
+.Table Insured Identity Attributes
+|===
+|Attribute|Description
+
+|iccsn          | The ICCSN is a unique identifier (digital serial number) of a smartcard. The ICCSN is not part of the certificates and must be determined separately. Normally, the respective ICCSN can be retrieved from the path of the provided certificates.
+|note           | It is an optional field and can be left empty.
+|identifier     | This attribute must contain the KVNR of a test identity. Based on the KVNR, e-prescriptions are assigned to the test identity in the E-Rezept Fachdienst.
+|type           | In this context, the type must always be set to "EGK".
+|ownerName      | It is an optional field and can be left empty.
+|stores         | The P12 containers can be provided as an array. The simulation automatically determines the appropriate certificate from this list depending on the use case.
+|===
+
 === Build and run from source
 To build the distributable JAR file, use the following Maven command.
 This command cleans the project, compiles the source code, and packages it
