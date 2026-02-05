@@ -6,7 +6,7 @@
 
     <artifactId>erp-fdv-test-driver-interface</artifactId>
     <groupId>de.gematik.erezept.remotefdv</groupId>
-    <version>1.1.3</version>
+    <version>1.1.4</version>
     <packaging>pom</packaging>
 
     <name>Test Driver Interface Parent</name>
@@ -60,7 +60,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <swagger-core-version>2.2.11</swagger-core-version>
-        <erp.testsuite.version>1.1.0</erp.testsuite.version>
+        <erp.testsuite.version>1.2.1</erp.testsuite.version>
         <version.spotless>2.41.1</version.spotless>
 
         <central-publishing-maven-plugin.version>0.7.0</central-publishing-maven-plugin.version>
