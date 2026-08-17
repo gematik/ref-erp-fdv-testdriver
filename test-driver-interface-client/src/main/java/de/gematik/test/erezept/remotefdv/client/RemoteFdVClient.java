@@ -25,26 +25,37 @@ import static java.text.MessageFormat.format;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.gematik.bbriccs.utils.ResourceLoader;
 import de.gematik.erezept.remotefdv.api.model.Error;
 import de.gematik.test.erezept.remotefdv.client.requests.PatientRequests;
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.net.*;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.security.KeyStore;
+import java.security.SecureRandom;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.yaml.snakeyaml.error.MissingEnvironmentVariableException;
 
 @Slf4j
 public class RemoteFdVClient {
   private final HttpRequestInfo requestInfo;
+  private final HttpClient httpClient;
 
-  private RemoteFdVClient(HttpRequestInfo requestInfo) {
+  private RemoteFdVClient(HttpRequestInfo requestInfo, HttpClient httpClient) {
     this.requestInfo = requestInfo;
+    this.httpClient = httpClient;
   }
 
   public static Builder builder() {
@@ -74,8 +85,11 @@ public class RemoteFdVClient {
     val requestBuilder =
         HttpRequest.newBuilder()
             .uri(URI.create(fullUrl.toString()))
-            .header("Authorization", requestInfo.getApiKey())
             .header("Content-Type", "application/json");
+
+    if (requestInfo.getApiKey() != null) {
+      requestBuilder.header("Authorization", requestInfo.getApiKey());
+    }
 
     val body =
         requestInfo.getBody() != null
@@ -107,8 +121,7 @@ public class RemoteFdVClient {
         return (FdVResponse<T>) errorResponse;
     }
 
-    HttpClient httpClient = HttpClient.newHttpClient();
-    HttpResponse<String> response = null;
+    HttpResponse<String> response;
     log.info("Sending request to {}", fullUrl);
     try {
       response = httpClient.send(requestBuilder.build(), HttpResponse.BodyHandlers.ofString());
@@ -131,21 +144,19 @@ public class RemoteFdVClient {
     return fdvResponse;
   }
 
-  public <T> List<T> deserialize(String response, PatientRequests<T> request) {
+  private <T> List<T> deserialize(String response, PatientRequests<T> request) {
     val objectMapper = new ObjectMapper();
     objectMapper.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
     if (request.getType().equals(String.class)) {
-      val list = List.of(response);
-      return (List<T>) list;
+      return (List<T>) List.of(response);
     }
-    if (!response.isEmpty()) {
-      try {
-        return objectMapper.readValue(response, request.getTypeReference());
-      } catch (JsonProcessingException e) {
-        throw new RuntimeException(e);
-      }
-    } else {
+    if (response.isEmpty()) {
       return Collections.emptyList();
+    }
+    try {
+      return objectMapper.readValue(response, request.getTypeReference());
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException(e);
     }
   }
 
@@ -158,6 +169,11 @@ public class RemoteFdVClient {
 
   public static class Builder {
     private final HttpRequestInfo requestBuilder = new HttpRequestInfo();
+    private boolean mTlsEnabled = false;
+    private String keyStorePath;
+    private String keyStorePassword;
+    private String trustStorePath;
+    private String trustStorePassword;
 
     public Builder forRemote(String host) {
       requestBuilder.setHost(host);
@@ -169,8 +185,80 @@ public class RemoteFdVClient {
       return this;
     }
 
+    public Builder withKeystore(String path, String password) {
+      mTlsEnabled = true;
+      this.keyStorePath = path;
+      this.keyStorePassword = password;
+      return this;
+    }
+
+    public Builder withTruststore(String path, String password) {
+      mTlsEnabled = true;
+      this.trustStorePath = path;
+      this.trustStorePassword = password;
+      return this;
+    }
+
+    private KeyStore loadKeyStore() throws Exception {
+      KeyStore keyStore = KeyStore.getInstance("PKCS12");
+      try (InputStream is = ResourceLoader.getFileFromResourceAsStream(keyStorePath)) {
+        keyStore.load(is, keyStorePassword.toCharArray());
+      }
+
+      return keyStore;
+    }
+
+    private KeyStore loadTrustStore() throws Exception {
+      val is = ResourceLoader.getFileFromResourceAsStream(trustStorePath);
+      if (is == null) {
+        log.warn(
+            "No truststore found at {}. Falling back to default JVM trust material.",
+            trustStorePath);
+        return null;
+      }
+      KeyStore trustStore = KeyStore.getInstance("PKCS12");
+      try (InputStream closable = is) {
+        trustStore.load(closable, trustStorePassword.toCharArray());
+      }
+      return trustStore;
+    }
+
+    private SSLContext createSslContextFromClasspathResources() {
+      try {
+        KeyManagerFactory kmf =
+            KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+        kmf.init(loadKeyStore(), keyStorePassword.toCharArray());
+
+        TrustManagerFactory tmf =
+            TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+        tmf.init(loadTrustStore());
+
+        SSLContext sslContext = SSLContext.getInstance("TLS");
+        sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), new SecureRandom());
+        return sslContext;
+      } catch (NullPointerException e) {
+        throw new MissingEnvironmentVariableException(
+            "Environment variable KEYSTORE_PASSWORD is not set.");
+      } catch (Exception e) {
+        throw new RemoteFdVErrorException(
+            "Failed to initialize mTLS SSL context: " + e.getMessage(), e);
+      }
+    }
+
+    private HttpClient createSslContextAwareHttpClient() {
+      SSLContext sslContext = createSslContextFromClasspathResources();
+      return HttpClient.newBuilder()
+          .sslContext(sslContext)
+          .connectTimeout(Duration.ofSeconds(30))
+          .build();
+    }
+
     public RemoteFdVClient build() {
-      return new RemoteFdVClient(requestBuilder);
+      if (mTlsEnabled) {
+        return new RemoteFdVClient(requestBuilder, createSslContextAwareHttpClient());
+      } else {
+        return new RemoteFdVClient(requestBuilder, HttpClient.newHttpClient());
+      }
     }
   }
 }

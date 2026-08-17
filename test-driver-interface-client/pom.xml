@@ -6,7 +6,7 @@
     <parent>
         <groupId>de.gematik.erezept.remotefdv</groupId>
         <artifactId>erp-fdv-test-driver-interface</artifactId>
-        <version>1.1.4</version>
+        <version>1.1.5</version>
     </parent>
 
     <artifactId>test-driver-interface-client</artifactId>
@@ -28,7 +28,12 @@
         <dependency>
             <groupId>de.gematik.erezept.remotefdv</groupId>
             <artifactId>test-driver-interface-data</artifactId>
-            <version>1.1.4</version>
+            <version>1.1.5</version>
+        </dependency>
+        <dependency>
+            <groupId>de.gematik.bbriccs</groupId>
+            <artifactId>resource-loader-brick</artifactId>
+            <version>0.11.0</version>
         </dependency>
     </dependencies>
 

@@ -20,12 +20,11 @@
 
 package de.gematik.test.erezept.remotefdv.server.mapping;
 
-import de.gematik.erezept.remotefdv.api.model.Medication;
-import de.gematik.erezept.remotefdv.api.model.MedicationDispense;
-import de.gematik.erezept.remotefdv.api.model.Pharmacist;
+import de.gematik.erezept.remotefdv.api.model.*;
 import de.gematik.test.erezept.fhir.r4.erp.ErxMedicationDispense;
 import de.gematik.test.erezept.fhir.r4.erp.GemErpMedication;
-import de.gematik.test.erezept.fhir.r4.kbv.KbvErpMedication;
+import de.gematik.test.erezept.fhir.r4.eu.EuMedicationDispense;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.val;
@@ -43,35 +42,48 @@ public class MedicationDispenseDataMapper {
       medication.setType(Medication.TypeEnum.PZN);
     }
     medication.setIsVaccine(gemErpMedication.isVaccine());
-    medication.setCode(gemErpMedication.getCode().getText());
-    return createMedDispense(erxMedDispense, medication);
-  }
-
-  public static MedicationDispense fromKbvErpMedication(
-      Pair<ErxMedicationDispense, KbvErpMedication> pair) {
-    val erxMedDispense = pair.getKey();
-    val kbvErpMedication = pair.getValue();
-    val medication = new Medication();
-    if (kbvErpMedication.getMedicationType().isPresent()) {
-      medication.setType(
-          Medication.TypeEnum.fromValue(kbvErpMedication.getMedicationType().get().getCode()));
-    }
-    medication.setIsVaccine(kbvErpMedication.isVaccine());
-    medication.setCode(kbvErpMedication.getCode().getText());
+    medication.setCode(gemErpMedication.getCode().getCodingFirstRep().getDisplay());
     return createMedDispense(erxMedDispense, medication);
   }
 
   private static MedicationDispense createMedDispense(
       ErxMedicationDispense erxMedDispense, Medication medication) {
-    val medDispense = new MedicationDispense();
+    val medDispense = new DeMedicationDispense();
     val pharmacist = new Pharmacist();
+    val pharmacy = new Pharmacy();
     pharmacist.setName(erxMedDispense.getPerformerFirstRep().toString());
     pharmacist.setIdentifier(erxMedDispense.getPerformerIdFirstRep());
+    pharmacy.setName(erxMedDispense.getPerformerFirstRep().toString());
+    pharmacy.setAddress(new Address());
+    pharmacy.setPharmacist(List.of(pharmacist));
     medDispense.setWhenhandedover(
         DataMapperUtils.formatToUTCString(erxMedDispense.getWhenHandedOver()));
     medDispense.setPrescriptionId(erxMedDispense.getPrescriptionId().getValue());
-    medDispense.setPharmacist(pharmacist);
+    medDispense.setPharmacy(pharmacy);
     medDispense.setMedication(medication);
+    medDispense.setDispenseType(MedicationDispense.DispenseTypeEnum.DE);
     return medDispense;
+  }
+
+  public static EUMedicationDispense fromEuErpMedication(
+      Pair<EuMedicationDispense, GemErpMedication> pair) {
+    val euMedicationDispense = pair.getKey();
+    val euErpMedication = pair.getValue();
+
+    val dto = new EUMedicationDispense();
+    val pharmacist = new Pharmacist();
+    pharmacist.setName(euMedicationDispense.getPerformerFirstRep().toString());
+    pharmacist.setIdentifier(euMedicationDispense.getPerformerIdFirstRep());
+    val medication = new Medication();
+    medication.setCode(euErpMedication.getCode().getCodingFirstRep().getDisplay());
+    medication.setIsVaccine(euErpMedication.isVaccine());
+    medication.setType(Medication.TypeEnum.PZN);
+    dto.setDispenseType(MedicationDispense.DispenseTypeEnum.EU);
+    dto.setPrescriptionId(euMedicationDispense.getPrescriptionId().getValue());
+    dto.setWhenhandedover(
+        DataMapperUtils.formatToUTCString(euMedicationDispense.getWhenHandedOver()));
+    dto.setMedication(medication);
+    dto.setPharmacist(pharmacist);
+    return dto;
   }
 }

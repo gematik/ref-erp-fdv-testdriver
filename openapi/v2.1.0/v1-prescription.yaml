@@ -1,0 +1,109 @@
+components:
+  requestBodies:
+    PrescriptionId:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/PrescriptionId"
+  responses:
+    Prescriptions:
+      description: "A list (max. 50 entries) of e-prescriptions, sorted in descending order by creation date"
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Prescription'
+    Prescription:
+      description: "See https://github.com/gematik/api-erp/blob/master/docs/erp_versicherte.adoc#alle-e-prescriptione-ansehen"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Prescription'
+  schemas:
+    Prescription:
+      type: object
+      description: "See https://gematik.de/fhir/erp/StructureDefinition/GEM_ERP_PR_Task"
+      properties:
+        prescriptionId:
+          $ref: '#/components/schemas/PrescriptionId'
+        accessCode:
+          $ref: '#/components/schemas/AccessCode'
+        workFlow:
+          $ref: '#/components/schemas/WorkFlow'
+        acceptDate:
+          $ref: '#/components/schemas/AcceptDate'
+        expiryDate:
+          $ref: '#/components/schemas/ExpiryDate'
+        authoredOn:
+          $ref: '#/components/schemas/AuthoredOn'
+        lastMedicationDispense:
+          $ref: '#/components/schemas/LastMedicationDispense'
+        status:
+          type: string
+          enum:
+            - ready
+            - in-progress
+            - cancelled
+            - completed
+        euRedeemableByProperties:
+          description: "true, if an e-prescription may be redeemed in another EU country"
+          type: boolean
+          example: true
+        euRedeemableByPatient:
+          $ref: './v1-eu-prescription.yaml#/components/schemas/EU-RedeemableByPatient'
+        patient:
+          $ref: './v1-patient.yaml#/components/schemas/Patient'
+        practitioner:
+          $ref: './v1-healthcare-providers.yaml#/components/schemas/Practitioner'
+        medication:
+          $ref: './v1-medication.yaml#/components/schemas/Medication'
+      required:
+        - prescriptionId
+        - workFlow
+        - authoredOn
+        - status
+        - acceptDate
+        - expiryDate
+    PrescriptionId:
+      type: string
+      description: "See https://simplifier.net/e-prescription-workflow/gem_erp_pr_prescriptionid"
+      example: 160.000.000.000.123.76
+    AccessCode:
+      type: string
+      description: "See https://gematik.de/fhir/erp/NamingSystem/GEM_ERP_NS_AccessCode"
+      example: "c3830cacdc32d8b521dbfc02e5f7102f879f53206b5fca1d80fee3bda969ce4d"
+    EU-AccessCode:
+      type: string
+      description: "https://gemspec.gematik.de/docs/gemF/gemF_eRp_EU/gemF_eRp_EU_V1.0.0/#A_27097"
+      pattern: "^[a-zA-Z0-9]{6}$"
+      example: "EU1234"
+    WorkFlow:
+      type: string
+      description: "See https://gematik.de/fhir/erp/StructureDefinition/GEM_ERP_EX_PrescriptionType"
+      enum:
+        - "160"
+        - "169"
+        - "200"
+        - "209"
+        - "162"
+      example: "160"
+    AcceptDate:
+      type: string
+      description: "See https://gematik.de/fhir/erp/StructureDefinition/GEM_ERP_EX_AcceptDate"
+      format: date
+      example: "2020-04-01"
+    ExpiryDate:
+      type: string
+      description: "See https://simplifier.net/e-prescription-workflow/gem_erp_ex_expirydate"
+      format: date
+      example: "2020-06-02"
+    AuthoredOn:
+      type: string
+      format: date-time
+      example: "2020-03-02T08:25:05+00:00"
+    LastMedicationDispense:
+      type: string
+      format: date-time
+      example: "2024-11-25T14:30:00+00:00"

@@ -1,0 +1,118 @@
+components:
+  requestBodies:
+    2DCode:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "./v1-prescription.yaml#/components/schemas/PrescriptionId"
+  responses:
+    Pharmacies:
+      description: "A list (max. 50 entries) of pharmacies, sorted in order by name"
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Pharmacy'
+    2DCode:
+      description: "Image (PNG) encoded as base64 string"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/2DCode'
+  schemas:
+    QualificationType:
+      type: string
+      example: "Fach&#228;rztin f&#252;r Innere Medizin"
+    2DCode:
+      type: string
+      format: byte
+      description: "Image (PNG) encoded as base64 string"
+    Practitioner:
+      type: object
+      properties:
+        name:
+          type: string
+        anr:
+          type: string
+        anrType:
+          type: string
+          enum:
+            - LANR
+            - ZANR
+        qualificationType:
+          $ref: "#/components/schemas/QualificationType"
+        telematikId:
+          $ref: "#/components/schemas/TelematikId"
+      required:
+        - name
+        - anr
+        - anrType
+        - qualificationType
+    Pharmacy:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Adlerapotheke"
+        pharmacist:
+          type: array
+          description: "Must contain at least one pharmacist"
+          minimum: 1
+          items:
+            $ref: "#/components/schemas/Pharmacist"
+        address:
+          $ref: "#/components/schemas/Address"
+        position:
+          type: object
+          properties:
+            latitude:
+              type: number
+              example: 52.522575
+            longitude:
+              type: number
+              example: 13.387884
+          required:
+            - latitude
+            - longitude
+      required:
+        - name
+        - address
+    Address:
+      type: object
+      properties:
+        city:
+          type: string
+          example: "Berlin"
+        street:
+          type: string
+          example: "Friedrichstr."
+        streetNr:
+          type: string
+          example: 136
+        zipcode:
+          type: number
+          example: 10117
+        country:
+          type: string
+          example: "Germany"
+    Pharmacist:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Max Mustermann"
+        identifier:
+          oneOf:
+            - $ref: "#/components/schemas/TelematikId"
+            - type: string
+              description: "Identification ID of the pharmacist"
+              example: "123456789"
+          minimum: 1
+      required:
+        - identifier
+    TelematikId:
+      type: string
+      description: "https://gematik.de/fhir/sid/telematik-id"
+      example: "3-1.54.10123404"

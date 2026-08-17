@@ -18,14 +18,29 @@
  * For additional notes and disclaimer from gematik and in case of changes by gematik find details in the "Readme" file.
  */
 
-package de.gematik.test.erezept.remotefdv.client;
+package de.gematik.test.erezept.remotefdv.client.requests;
 
-public class RemoteFdVErrorException extends RuntimeException {
-  public RemoteFdVErrorException(String message) {
-    super(message);
+import com.fasterxml.jackson.core.type.TypeReference;
+import de.gematik.test.erezept.remotefdv.client.HttpRequestInfo;
+import java.util.List;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+@Getter
+@RequiredArgsConstructor
+public class TestRequest implements PatientRequests<String> {
+  private final String method;
+  private final String endpoint;
+  private final TypeReference<List<String>> typeReference = new TypeReference<>() {};
+
+  @Override
+  public Class<String> getType() {
+    return String.class;
   }
 
-  public RemoteFdVErrorException(String message, Throwable cause) {
-    super(message, cause);
+  @Override
+  public void finalizeRequest(HttpRequestInfo rb) {
+    rb.setMethod(method);
+    rb.setResource(endpoint);
   }
 }

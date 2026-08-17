@@ -1,0 +1,62 @@
+components:
+  responses:
+    MedicationDispenses:
+      description: "A list of all dispense information for the patient"
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              oneOf:
+                - $ref: '#/components/schemas/EU-MedicationDispense'
+                - $ref: '#/components/schemas/DeMedicationDispense'
+
+  schemas:
+    MedicationDispense:
+      description: "Includes reduced dispensing information for an e-prescription"
+      type: object
+      discriminator:
+        propertyName: dispenseType
+        mapping:
+          EU: '#/components/schemas/EU-MedicationDispense'
+          DE: '#/components/schemas/DeMedicationDispense'
+      properties:
+        dispenseType:
+          type: string
+          description: "Discriminator field to distinguish between EU and DE medication dispenses"
+          enum:
+            - EU
+            - DE
+        prescriptionId:
+          $ref: './v1-prescription.yaml#/components/schemas/PrescriptionId'
+        medication:
+          $ref: './v1-medication.yaml#/components/schemas/Medication'
+        whenhandedover:
+          type: string
+          format: date
+          example: "2020-03-20"
+      required:
+        - dispenseType
+        - prescriptionId
+        - medication
+        - whenhandedover
+    DeMedicationDispense:
+      description: "Includes reduced dispensing information for an e-prescription"
+      allOf:
+        - $ref: '#/components/schemas/MedicationDispense'
+        - type: object
+          properties:
+            pharmacy:
+              $ref: './v1-healthcare-providers.yaml#/components/schemas/Pharmacy'
+          required:
+            - pharmacy
+    EU-MedicationDispense:
+      description: "Includes reduced dispensing information for an e-prescription"
+      allOf:
+        - $ref: '#/components/schemas/MedicationDispense'
+        - type: object
+          properties:
+            pharmacist:
+              $ref: './v1-healthcare-providers.yaml#/components/schemas/Pharmacist'
+          required:
+            - pharmacist

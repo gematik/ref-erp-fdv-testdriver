@@ -1,5 +1,12 @@
 # Release Notes ERP FdV Test Driver Interface
 
+## Release 1.1.5
+* openapi / v2.1.0
+  - added required discriminator property "dispenseType" to schema/MedicationDispense in v1-medication-dispense.yaml
+  - added schema DeMedicationDispense in v1-medication-dispense.yaml
+  - changed the "pharmacy" field to "pharmacist" in schema/EU-MedicationDispense in v1-medication-dispense.yaml
+
+
 ## Release 1.1.1
 * test-driver-interface-server
   - added smartcards-fdv directory containing test identities

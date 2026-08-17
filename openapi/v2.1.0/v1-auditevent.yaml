@@ -1,0 +1,41 @@
+components:
+  responses:
+    AuditEvents:
+      description: "A list (max. 50 entries) of audit events, sorted in descending order by creation date"
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/AuditEvent'
+  schemas:
+    # AuditEvent
+    AuditEvent:
+      description: "Reduced modeled by https://gematik.de/fhir/erp/StructureDefinition/GEM_ERP_PR_AuditEvent"
+      properties:
+        text:
+          type: string
+          example: "Juliane Steinmeyer hat eine Liste von E-Rezepten heruntergeladen"
+        recorded:
+          type: string
+          format: date-time
+          example: "2024-11-25T14:30:00+00:00"
+        prescriptionId:
+          $ref: './v1-prescription.yaml#/components/schemas/PrescriptionId'
+        action:
+          type: string
+          enum: [ "C", "R", "U", "D", "E" ]
+          example: "R"
+        who:
+          type: string
+          description: "Agent that triggered this event"
+          oneOf:
+            - $ref: './v1-patient.yaml#/components/schemas/Kvid'
+            - $ref: './v1-healthcare-providers.yaml#/components/schemas/TelematikId'
+            - $ref: './v1-commons.yaml#/components/schemas/System'
+      required:
+        - text
+        - recorded
+        - prescriptionId
+        - action
+        - who

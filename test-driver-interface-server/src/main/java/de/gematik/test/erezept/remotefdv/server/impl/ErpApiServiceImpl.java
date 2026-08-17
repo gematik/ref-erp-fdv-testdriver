@@ -260,23 +260,20 @@ public class ErpApiServiceImpl extends ErpApiService {
     val medDispenseBundle = response.getExpectedResource();
     val medDispenses = medDispenseBundle.getMedicationDispenses().stream().limit(50).toList();
 
-    val kbvMedicationsDto =
-        medDispenses.stream()
-            .filter(md -> !(md.getContainedKbvMedication().isEmpty()))
-            .flatMap(md -> medDispenseBundle.unpackDispensePairBy(md.getPrescriptionId()).stream())
-            .map(MedicationDispenseDataMapper::fromKbvErpMedication)
-            .toList();
-
     val gemMedicationDto =
         medDispenses.stream()
-            .filter(md -> md.getContainedKbvMedication().isEmpty())
             .flatMap(md -> medDispenseBundle.getDispensePairBy(md.getPrescriptionId()).stream())
             .map(MedicationDispenseDataMapper::fromGemErpMedication)
             .toList();
+    val euMedicationDto =
+        medDispenseBundle.getEuMedicationDispenses().stream()
+            .flatMap(md -> medDispenseBundle.getEuDispensePairBy(md.getPrescriptionId()).stream())
+            .map(MedicationDispenseDataMapper::fromEuErpMedication)
+            .toList();
 
     val dtos = new ArrayList<MedicationDispense>();
-    dtos.addAll(kbvMedicationsDto);
     dtos.addAll(gemMedicationDto);
+    dtos.addAll(euMedicationDto);
     return responseBuilder.entity(dtos).build();
   }
 
