@@ -4,11 +4,18 @@ include::./attributes-sections.adoc[]
 The TDI (Test Driver Interface) is a lightweight service that acts as a remote control for E-Rezept applications. It enables automated interaction, testing, and orchestration of E-Rezept workflows, making it easy to simulate user actions and system events for development and quality assurance.
 
 === Prerequisites
-- Java 17+ (JDK)
+- Java 21+ (JDK)
 - Maven 3.9+
 - Git
 - Docker (optional, for containerized deployment)
 - virtual eGK certificates (link:https://gematik.github.io/lib-bbriccs/Bbriccs-User-Manual.html#_smartcard_archiv[Smartcards archive])
+
+Verify your local Java runtime:
+
+[source,shell]
+----
+java -version
+----
 
 === Source Code
 
@@ -110,10 +117,8 @@ The image can now be started with the following command using link:https://docs.
 
 [source,shell,subs="attributes"]
 ----
-docker run --name {app-name-cli} \
-      -p [HOST_PORT]:8080 \
-      --env SMARTCARDS_CONFIG_PATH=[PATH_ON_CONTAINER] \
-      -v [PATH_ON_HOST]:[PATH_ON_CONTAINER] \
+docker run --name test \
+      -p 8080:8080 \
       erp-fdv-tdi
 ----
 

@@ -1,0 +1,23 @@
+components:
+  schemas:
+    Medication:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - freitext
+            - pzn
+            - rezeptur
+            - wirkstoff
+          example: "pzn"
+        code:
+          type: string
+          description: "Contains value for PZN, recipe, ingredient or a free text of a medication"
+          example: "Nerisona 30g, Asche Basis 60g"
+        isVaccine:
+          type: boolean
+      required:
+        - code
+        - type
+        - isVaccine

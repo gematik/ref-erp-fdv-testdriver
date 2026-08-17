@@ -17,12 +17,12 @@
 # image from the install or build stage where the necessary files are copied
 # from the install stage.
 #
-# The example below uses eclipse-turmin's JRE image as the foundation for running the app.
-# By specifying the "17-jre-jammy" tag, it will also use whatever happens to be the
+# The example below uses eclipse-temurin's JDK image as the foundation for running the app.
+# By specifying the "21-jdk" tag, it will also use whatever happens to be the
 # most recent version of that tag when you build your Dockerfile.
 # If reproducibility is important, consider using a specific digest SHA, like
 # eclipse-temurin@sha256:99cede493dfd88720b610eb8077c8688d3cca50003d76d1d539b0efc8cca72b4.
-FROM eclipse-temurin:17-jdk
+FROM eclipse-temurin:21-jdk
 # Create a non-privileged user that the app will run under.
 # See https://docs.docker.com/go/dockerfile-user-best-practices/
 WORKDIR /app

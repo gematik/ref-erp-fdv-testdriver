@@ -40,6 +40,10 @@ public class PatientRequests {
     return new Start();
   }
 
+  public static TestRequest testRequest(String method, String endpoint) {
+    return new TestRequest(method, endpoint);
+  }
+
   public static Stop stopFdV() {
     return new Stop();
   }

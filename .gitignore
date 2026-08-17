@@ -28,4 +28,6 @@ CI
 /test-driver-interface-server/smartcards-fdv/egk/
 /test-driver-interface-server/smartcards-fdv/egk
 test-driver-interface-server/smartcards-fdv/egk
+test-driver-interface-client/src/test/java/de/gematik/test/erezept/remotefdv/client/RemoteFdVIT.java
+
 

@@ -37,6 +37,7 @@ import java.util.UUID;
 import lombok.val;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.MedicationDispense;
 import org.junit.jupiter.api.Test;
 
@@ -54,9 +55,13 @@ class MedicationDispenseDataMapperTest {
     when(erxMedDispense.getPerformerIdFirstRep()).thenReturn(fakerTelematikId());
     when(erxMedDispense.getPerformerFirstRep())
         .thenReturn(new MedicationDispense.MedicationDispensePerformerComponent());
+
     val cc = mock(CodeableConcept.class);
-    when(cc.getText()).thenReturn("Nerisona 30g, Asche Basis 60g");
+    val coding = mock(Coding.class);
+    when(coding.getDisplay()).thenReturn("Nerisona 30g, Asche Basis 60g");
+    when(cc.getCodingFirstRep()).thenReturn(coding);
     when(gemErpMedication.getCode()).thenReturn(cc);
+
     Pair<ErxMedicationDispense, GemErpMedication> pair = Pair.of(erxMedDispense, gemErpMedication);
     assertDoesNotThrow(() -> MedicationDispenseDataMapper.fromGemErpMedication(pair));
   }

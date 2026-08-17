@@ -6,7 +6,7 @@
 
     <artifactId>erp-fdv-test-driver-interface</artifactId>
     <groupId>de.gematik.erezept.remotefdv</groupId>
-    <version>1.1.4</version>
+    <version>1.1.5</version>
     <packaging>pom</packaging>
 
     <name>Test Driver Interface Parent</name>
@@ -55,8 +55,8 @@
     </developers>
 
     <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <swagger-core-version>2.2.11</swagger-core-version>
@@ -117,7 +117,7 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>6.0.1</version>
+            <version>5.10.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -152,9 +152,8 @@
                     <version>7.17.0</version>
                     <configuration>
                         <generatorName>jaxrs-jersey</generatorName>
-                        <inputSpec>${project.basedir}/../openapi/v2.0.0/ErpTestDriver.yaml</inputSpec>
+                        <inputSpec>${project.basedir}/../openapi/v2.1.0/ErpTestDriver.yaml</inputSpec>
                         <output>${project.build.directory}/generated-sources</output>
-
                         <apiPackage>de.gematik.erezept.remotefdv.api.api</apiPackage>
                         <modelPackage>de.gematik.erezept.remotefdv.api.model</modelPackage>
 
@@ -166,7 +165,7 @@
 
                 <plugin>
                     <artifactId>maven-failsafe-plugin</artifactId>
-                    <version>3.1.0</version>
+                    <version>3.2.5</version>
                     <configuration>
                         <skip>${skip.inttests}</skip>
                     </configuration>
@@ -183,6 +182,27 @@
         </pluginManagement>
 
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.5.0</version>
+                <executions>
+                    <execution>
+                        <id>enforce-java-version</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireJavaVersion>
+                                    <version>[21,)</version>
+                                </requireJavaVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -218,7 +238,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.1.0</version>
+                <version>3.2.5</version>
                 <configuration>
                     <!--suppress UnresolvedMavenProperty -->
                     <argLine>${surefireArgLine} -Dfile.encoding=UTF-8</argLine>
