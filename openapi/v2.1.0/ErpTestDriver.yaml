@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: "Test drive interface for e-Prescription FdV Module"
   description: "REST interface to automate the test of a e-Prescription FdV Module implementation."
-  version: 2.0.0
+  version: 2.1.0
   contact:
     name: gematik GmbH
     email: software-development@gematik.de
