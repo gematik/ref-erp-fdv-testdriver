@@ -6,7 +6,7 @@
 
     <artifactId>erp-fdv-test-driver-interface</artifactId>
     <groupId>de.gematik.erezept.remotefdv</groupId>
-    <version>1.1.5</version>
+    <version>1.1.6</version>
     <packaging>pom</packaging>
 
     <name>Test Driver Interface Parent</name>
