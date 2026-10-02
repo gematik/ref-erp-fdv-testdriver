@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 gematik GmbH
+ * Copyright 2026 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import lombok.Getter;
 import org.json.JSONObject;
 
 @AllArgsConstructor
-public class PatchPrescriptionById implements PatientRequests<Prescription> {
+public class PatchPrescriptionById implements FdVRequests<Prescription> {
   private final String prescriptionId;
   private final boolean euRedeemable;
   private final @Getter Class<Prescription> type = Prescription.class;

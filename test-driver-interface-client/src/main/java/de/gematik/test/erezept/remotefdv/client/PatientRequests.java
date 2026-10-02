@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 gematik GmbH
+ * Copyright 2026 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import de.gematik.erezept.remotefdv.api.model.ConsentCategory;
 import de.gematik.test.erezept.remotefdv.client.requests.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.apache.commons.lang3.NotImplementedException;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class PatientRequests {
@@ -40,12 +39,12 @@ public class PatientRequests {
     return new Start();
   }
 
-  public static TestRequest testRequest(String method, String endpoint) {
-    return new TestRequest(method, endpoint);
-  }
-
   public static Stop stopFdV() {
     return new Stop();
+  }
+
+  public static GetInformation getInformation() {
+    return new GetInformation();
   }
 
   public static GetPrescriptionById getPrescriptionById(String prescriptionId) {
@@ -60,12 +59,12 @@ public class PatientRequests {
     return new GetMedicationDispense(whenHandedOver);
   }
 
-  public static GetAuditEvents getAuditEvents() {
-    return new GetAuditEvents();
+  public static GetEuMedicationDispense getEuMedicationDispense(String whenHandedOver) {
+    return new GetEuMedicationDispense(whenHandedOver);
   }
 
-  public static String getPharmacy() {
-    throw new NotImplementedException("Not implemented yet");
+  public static GetAuditEvents getAuditEvents() {
+    return new GetAuditEvents();
   }
 
   public static PharmacyAssignment assignToPharmacy(

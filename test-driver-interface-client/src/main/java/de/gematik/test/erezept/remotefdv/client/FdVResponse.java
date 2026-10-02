@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 gematik GmbH
+ * Copyright 2026 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ public class FdVResponse<R> {
 
   public Optional<R> getResourceOptional() {
     val res = getResourcesListOptional();
-    return res.map(rs -> rs.get(0));
+    return res.map(rs -> rs.getFirst());
   }
 
   public Optional<List<R>> getResourcesListOptional() {
@@ -44,11 +44,11 @@ public class FdVResponse<R> {
 
   public R getExpectedResource() {
     return getResourceOptional()
-        .orElseThrow(() -> new RuntimeException(operationOutcome.getDetails()));
+        .orElseThrow(() -> new RemoteFdVErrorException(operationOutcome.getDetails()));
   }
 
   public List<R> getExpectedResourcesList() {
     return getResourcesListOptional()
-        .orElseThrow(() -> new RuntimeException(operationOutcome.getDetails()));
+        .orElseThrow(() -> new RemoteFdVErrorException(operationOutcome.getDetails()));
   }
 }

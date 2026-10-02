@@ -18,29 +18,16 @@
  * For additional notes and disclaimer from gematik and in case of changes by gematik find details in the "Readme" file.
  */
 
-package de.gematik.test.erezept.remotefdv.server.actors;
+package de.gematik.test.erezept.remotefdv.client.requests;
 
-import de.gematik.bbriccs.rest.fd.FhirBResponse;
-import de.gematik.bbriccs.smartcards.Egk;
-import de.gematik.test.erezept.client.ErpClient;
-import de.gematik.test.erezept.client.usecases.ErpBaseCommand;
-import lombok.Getter;
-import org.hl7.fhir.r4.model.Resource;
+import com.fasterxml.jackson.core.type.TypeReference;
+import de.gematik.test.erezept.remotefdv.client.HttpRequestInfo;
+import java.util.List;
 
-@Getter
-public class Patient {
-  private ErpClient client;
-  private Egk egk;
+public interface FdVRequests<T> {
+  TypeReference<List<T>> getTypeReference();
 
-  public void setClient(ErpClient client) {
-    this.client = client;
-  }
+  Class<T> getType();
 
-  public void setEgk(Egk egk) {
-    this.egk = egk;
-  }
-
-  public final <R extends Resource> FhirBResponse<R> erpRequest(final ErpBaseCommand<R> command) {
-    return this.getClient().request(command);
-  }
+  void finalizeRequest(HttpRequestInfo rb);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 gematik GmbH
+ * Copyright 2026 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class GetMedicationDispense implements PatientRequests<MedicationDispense> {
+public class GetMedicationDispense implements FdVRequests<MedicationDispense> {
 
   private final String whenHandedOver;
   private final @Getter Class<MedicationDispense> type = MedicationDispense.class;

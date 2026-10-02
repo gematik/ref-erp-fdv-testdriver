@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 gematik GmbH
+ * Copyright 2026 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,16 +18,19 @@
  * For additional notes and disclaimer from gematik and in case of changes by gematik find details in the "Readme" file.
  */
 
-package de.gematik.test.erezept.remotefdv.client.requests;
+package de.gematik.test.erezept.remotefdv.client;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import de.gematik.test.erezept.remotefdv.client.HttpRequestInfo;
-import java.util.List;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public interface PatientRequests<T> {
-  TypeReference<List<T>> getTypeReference();
+import org.junit.jupiter.api.Test;
 
-  Class<T> getType();
-
-  void finalizeRequest(HttpRequestInfo rb);
+class RemoteFdVErrorExceptionTest {
+  @Test
+  void shouldThrow() {
+    assertThrows(
+        RemoteFdVErrorException.class,
+        () -> {
+          throw new RemoteFdVErrorException("Test", new Throwable());
+        });
+  }
 }

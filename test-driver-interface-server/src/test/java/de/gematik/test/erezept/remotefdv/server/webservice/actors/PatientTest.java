@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 gematik GmbH
+ * Copyright 2026 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import de.gematik.bbriccs.rest.fd.FhirBResponse;
 import de.gematik.bbriccs.smartcards.Egk;
 import de.gematik.test.erezept.client.ErpClient;
-import de.gematik.test.erezept.client.rest.ErpResponse;
 import de.gematik.test.erezept.client.usecases.TaskGetCommand;
 import de.gematik.test.erezept.remotefdv.server.actors.Patient;
 import lombok.val;
@@ -43,7 +43,7 @@ class PatientTest {
     patient.setClient(client);
     patient.setEgk(egk);
 
-    val erpResponse = mock(ErpResponse.class);
+    val erpResponse = mock(FhirBResponse.class);
     val command = new TaskGetCommand();
     when(client.request(any())).thenReturn(erpResponse);
     assertDoesNotThrow(() -> patient.erpRequest(command));

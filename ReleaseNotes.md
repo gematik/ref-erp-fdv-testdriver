@@ -1,5 +1,40 @@
 # Release Notes ERP FdV Test Driver Interface
 
+## Release 1.1.7
+Updated dependencies:
+
+* ch.qos.logback:logback-classic from v1.5.18 to v1.6.3
+* org.mockito:mockito-core from v5.12.0 to v5.24.0
+* org.junit.jupiter:junit-jupiter from v5.10.0 to v5.14.4
+* com.fasterxml.jackson.datatype from v2.17.1 to v2.22.3
+* org.junit.jupiter:junit-jupiter from v5.14.4 to v6.1.3
+* org.glassfish.jersey from v2.41 to v2.48
+* org.projectlombok from v1.18.38 to 1.18.48
+* io.swagger:swagger-annotations from v1.6.11 to v1.6.16
+* commons-io from v2.21.0 to v2.22.0
+* com.google.zxing from v3.5.3 to v3.5.4
+* org.eclipse.jetty from v9.4.54.v20240208 to v9.4.58.v20250814
+
+Updated plugins:
+* org.openapitools:openapi-generator-maven-plugin from v7.17.0 to v7.25.0
+* maven-failsafe-plugin from v3.2.5 to v3.6.0
+* maven-enforcer-plugin from v3.5.0 to v3.6.3
+* maven-compiler-plugin from v3.14.0 to v3.16.0
+* jacoco-maven-plugin from v0.8.14 to v0.8.15
+* maven-surefire-plugin from v3.2.5 to v3.6.0
+* spotless-maven-plugin from v2.41.1 to v2.46.1
+* maven-gpg-plugin from v3.2.7 to v3.2.8
+* central-publishing-maven-plugin from v0.7.0 to v0.11.0
+* maven-source-plugin from v3.3.1 to v3.4.0
+* maven-javadoc-plugin from v3.11.2 to v3.12.0
+* maven-jar-plugin from v3.3.0 to v3.5.1
+* maven-assembly-plugin from v3.5.0 to v3.8.0
+* maven-war-plugin from v1.9.1 to v1.12
+* jetty-maven-plugin from v9.4.54.v20240208 to v9.4.58.v20250814
+
+
+
+
 ## Release 1.1.6
 * openapi / v2.1.0
   - added required discriminator property "dispenseType" to schema/MedicationDispense in v1-medication-dispense.yaml

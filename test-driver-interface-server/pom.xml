@@ -7,13 +7,13 @@
     <parent>
         <groupId>de.gematik.erezept.remotefdv</groupId>
         <artifactId>erp-fdv-test-driver-interface</artifactId>
-        <version>1.1.6</version>
+        <version>1.1.7</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>test-driver-interface-server</artifactId>
     <packaging>jar</packaging>
-    <version>1.1.6</version>
+    <version>1.1.7</version>
 
     <name>Test Driver Interface Server</name>
     <description>Mock Implementation of OpenAPI</description>
@@ -28,7 +28,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-jar-plugin</artifactId>
-                        <version>3.3.0</version>
+                        <version>3.5.1</version>
                         <configuration>
                             <archive>
                                 <manifest>
@@ -43,7 +43,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-assembly-plugin</artifactId>
-                        <version>3.5.0</version>
+                        <version>3.8.0</version>
                         <executions>
                             <execution>
                                 <id>make-tdiserver</id>
@@ -75,12 +75,12 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
-                <version>3.2.3</version>
+                <version>3.5.1</version>
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
-                <version>1.9.1</version>
+                <version>1.12</version>
                 <executions>
                     <execution>
                         <id>add-source</id>
@@ -99,7 +99,7 @@
             <plugin>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
-                <version>9.4.54.v20240208</version>
+                <version>9.4.58.v20250814</version>
                 <configuration>
                     <webApp>
                         <contextPath>/</contextPath>
@@ -131,7 +131,7 @@
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.21.0</version>
+            <version>2.22.0</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -211,17 +211,20 @@
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-joda</artifactId>
-            <version>2.17.1</version>
+            <version>2.22.3</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.jaxrs</groupId>
             <artifactId>jackson-jaxrs-json-provider</artifactId>
             <version>${version.fasterxml.jackson}</version>
         </dependency>
+        <!-- Annotations stayed on the 2.x group id in Jackson 3; erp-client pulls
+             tools.jackson 3.2.0, whose databind needs JsonSerializeAs from 2.22. The rest of the
+             Jackson 2 stack below stays on ${version.fasterxml.jackson} for the JAX-RS provider. -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-            <version>${version.fasterxml.jackson}</version>
+            <version>${version.fasterxml.jackson.annotations}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -279,13 +282,21 @@
         <dependency>
             <groupId>de.gematik.bbriccs</groupId>
             <artifactId>unit-test-utility-brick</artifactId>
-            <version>0.8.0-SNAPSHOT</version>
+            <version>0.11.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <scope>test</scope>
+        </dependency>
+        <!-- erp-config-data declares konnektor-client-brick as "provided", but
+             PrimsysConfigurationDto references KonnektorConfiguration from it, so without this the
+             config fails to load at runtime with "Type ...KonnektorConfiguration not present". -->
+        <dependency>
+            <groupId>de.gematik.bbriccs</groupId>
+            <artifactId>konnektor-client-brick</artifactId>
+            <version>${version.bbriccs}</version>
         </dependency>
         <dependency>
             <groupId>de.gematik.test.erezept</groupId>
@@ -313,18 +324,18 @@
         <dependency>
             <groupId>de.gematik.erezept.remotefdv</groupId>
             <artifactId>test-driver-interface-data</artifactId>
-            <version>1.1.6</version>
+            <version>1.1.7</version>
         </dependency>
         <!-- required by the Doctor to generate DMC for "low-detail" Prescription -->
         <dependency>
             <groupId>com.google.zxing</groupId>
             <artifactId>core</artifactId>
-            <version>3.5.3</version>
+            <version>3.5.4</version>
         </dependency>
         <dependency>
             <groupId>com.google.zxing</groupId>
             <artifactId>javase</artifactId>
-            <version>3.5.3</version>
+            <version>3.5.4</version>
         </dependency>
         <dependency>
             <groupId>io.swagger</groupId>
@@ -333,10 +344,12 @@
     </dependencies>
 
     <properties>
-        <version.jersey>2.41</version.jersey>
-        <version.jetty>9.4.54.v20240208</version.jetty>
+        <version.jersey>2.48</version.jersey>
+        <version.jetty>9.4.58.v20250814</version.jetty>
 
-        <version.fasterxml.jackson>2.17.1</version.fasterxml.jackson>
+        <version.bbriccs>0.11.0</version.bbriccs>
+        <version.fasterxml.jackson>2.22.3</version.fasterxml.jackson>
+        <version.fasterxml.jackson.annotations>2.22</version.fasterxml.jackson.annotations>
         <main.class>de.gematik.test.erezept.remotefdv.server.Main</main.class>
     </properties>
 </project>

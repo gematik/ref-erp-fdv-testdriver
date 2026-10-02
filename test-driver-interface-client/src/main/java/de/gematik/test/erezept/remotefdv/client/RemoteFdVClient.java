@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 gematik GmbH
+ * Copyright 2026 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.gematik.bbriccs.utils.ResourceLoader;
 import de.gematik.erezept.remotefdv.api.model.Error;
-import de.gematik.test.erezept.remotefdv.client.requests.PatientRequests;
+import de.gematik.test.erezept.remotefdv.client.requests.FdVRequests;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -62,7 +62,7 @@ public class RemoteFdVClient {
     return new Builder();
   }
 
-  public <T> FdVResponse<T> sendRequest(PatientRequests<T> request) {
+  public <T> FdVResponse<T> sendRequest(FdVRequests<T> request) {
     request.finalizeRequest(requestInfo);
     val fullUrl =
         new StringBuilder(
@@ -122,7 +122,7 @@ public class RemoteFdVClient {
     }
 
     HttpResponse<String> response;
-    log.info("Sending request to {}", fullUrl);
+    log.info("Sending {} request to {}", requestInfo.getMethod(), fullUrl);
     try {
       response = httpClient.send(requestBuilder.build(), HttpResponse.BodyHandlers.ofString());
     } catch (IOException | InterruptedException e) {
@@ -144,7 +144,7 @@ public class RemoteFdVClient {
     return fdvResponse;
   }
 
-  private <T> List<T> deserialize(String response, PatientRequests<T> request) {
+  private <T> List<T> deserialize(String response, FdVRequests<T> request) {
     val objectMapper = new ObjectMapper();
     objectMapper.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
     if (request.getType().equals(String.class)) {
@@ -169,6 +169,7 @@ public class RemoteFdVClient {
 
   public static class Builder {
     private final HttpRequestInfo requestBuilder = new HttpRequestInfo();
+    private HttpClient httpClient = HttpClient.newHttpClient();
     private boolean mTlsEnabled = false;
     private String keyStorePath;
     private String keyStorePassword;
@@ -196,6 +197,11 @@ public class RemoteFdVClient {
       mTlsEnabled = true;
       this.trustStorePath = path;
       this.trustStorePassword = password;
+      return this;
+    }
+
+    Builder withHttpClient(HttpClient httpClient) {
+      this.httpClient = httpClient;
       return this;
     }
 
@@ -257,7 +263,7 @@ public class RemoteFdVClient {
       if (mTlsEnabled) {
         return new RemoteFdVClient(requestBuilder, createSslContextAwareHttpClient());
       } else {
-        return new RemoteFdVClient(requestBuilder, HttpClient.newHttpClient());
+        return new RemoteFdVClient(requestBuilder, httpClient);
       }
     }
   }

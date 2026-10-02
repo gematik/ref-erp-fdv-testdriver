@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 gematik GmbH
+ * Copyright 2026 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,26 +21,24 @@
 package de.gematik.test.erezept.remotefdv.client.requests;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import de.gematik.erezept.remotefdv.api.model.EUMedicationDispense;
 import de.gematik.test.erezept.remotefdv.client.HttpRequestInfo;
 import java.util.List;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-@Getter
 @RequiredArgsConstructor
-public class TestRequest implements PatientRequests<String> {
-  private final String method;
-  private final String endpoint;
-  private final TypeReference<List<String>> typeReference = new TypeReference<>() {};
+public class GetEuMedicationDispense implements FdVRequests<EUMedicationDispense> {
 
-  @Override
-  public Class<String> getType() {
-    return String.class;
-  }
+  private final String whenHandedOver;
+  private final @Getter Class<EUMedicationDispense> type = EUMedicationDispense.class;
+  private final @Getter TypeReference<List<EUMedicationDispense>> typeReference =
+      new TypeReference<>() {};
 
   @Override
   public void finalizeRequest(HttpRequestInfo rb) {
-    rb.setMethod(method);
-    rb.setResource(endpoint);
+    rb.setResource("medicationdispense");
+    rb.setMethod("GET");
+    rb.setParameters("whenhandedover", whenHandedOver);
   }
 }
