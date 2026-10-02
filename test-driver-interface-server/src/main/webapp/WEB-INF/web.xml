@@ -10,7 +10,8 @@
             <param-name>jersey.config.server.provider.packages</param-name>
             <param-value>
                 io.swagger.v3.jaxrs2.integration.resources,
-                de.gematik.erezept.remotefdv.api.api
+                de.gematik.erezept.remotefdv.api.api,
+                de.gematik.test.erezept.remotefdv.server.api
             </param-value>
         </init-param>
         <init-param>

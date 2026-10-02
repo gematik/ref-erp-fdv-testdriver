@@ -17,6 +17,7 @@ components:
           enum:
             - GKV
             - PKV
+            - KVZ10
       required:
         - name
         - kvnr

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 gematik GmbH
+ * Copyright 2026 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ package de.gematik.test.erezept.remotefdv.server.impl;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import de.gematik.bbriccs.fhir.de.value.KVNR;
+import de.gematik.bbriccs.fhir.exceptions.FhirValidationException;
+import de.gematik.bbriccs.rest.fd.FhirBResponse;
 import de.gematik.bbriccs.smartcards.Egk;
 import de.gematik.bbriccs.smartcards.exceptions.CardNotFoundException;
 import de.gematik.erezept.remotefdv.api.api.ApiResponseMessage;
@@ -30,7 +32,6 @@ import de.gematik.erezept.remotefdv.api.api.ErpApiService;
 import de.gematik.erezept.remotefdv.api.api.NotFoundException;
 import de.gematik.erezept.remotefdv.api.model.*;
 import de.gematik.test.erezept.client.ErpClient;
-import de.gematik.test.erezept.client.rest.ErpResponse;
 import de.gematik.test.erezept.client.rest.param.SortOrder;
 import de.gematik.test.erezept.client.usecases.*;
 import de.gematik.test.erezept.client.usecases.eu.*;
@@ -40,11 +41,12 @@ import de.gematik.test.erezept.fhir.builder.erp.ErxCommunicationBuilder;
 import de.gematik.test.erezept.fhir.builder.eu.EuPatchTaskInputBuilder;
 import de.gematik.test.erezept.fhir.extensions.erp.SupplyOptionsType;
 import de.gematik.test.erezept.fhir.profiles.version.ErpWorkflowVersion;
+import de.gematik.test.erezept.fhir.r4.erp.ErxTask;
 import de.gematik.test.erezept.fhir.values.AccessCode;
 import de.gematik.test.erezept.fhir.values.EuAccessCode;
 import de.gematik.test.erezept.fhir.values.TaskId;
 import de.gematik.test.erezept.fhir.values.json.CommunicationDisReqMessage;
-import de.gematik.test.erezept.fhir.valuesets.IsoCountryCode;
+import de.gematik.test.erezept.fhir.valuesets.IsoCountryCodeNCPeH;
 import de.gematik.test.erezept.remotefdv.server.actors.Patient;
 import de.gematik.test.erezept.remotefdv.server.config.MyConfigurationFactory;
 import de.gematik.test.erezept.remotefdv.server.config.TestFdVFactory;
@@ -57,14 +59,19 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Optional;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import kong.unirest.core.json.JSONException;
 import kong.unirest.core.json.JSONObject;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 
+@Setter
+@Getter
 @Slf4j
 @javax.annotation.Generated(
     value = "io.swagger.codegen.v3.generators.java.JavaJerseyServerCodegen",
@@ -77,13 +84,17 @@ public class ErpApiServiceImpl extends ErpApiService {
   private static String startTime;
   private MyConfigurationFactory mcf;
 
-  public void setErpClient(ErpClient erpClient) {
+  /*public void setErpClient(ErpClient erpClient) {
     this.erpClient = erpClient;
   }
 
   public void setPatient(Patient patient) {
     this.patient = patient;
   }
+
+  public void setMcf(MyConfigurationFactory mcf) {
+    this.mcf = mcf;
+  }*/
 
   public Response.ResponseBuilder checkRequiredFields() {
     if (patient == null) {
@@ -101,7 +112,7 @@ public class ErpApiServiceImpl extends ErpApiService {
     return Response.ok();
   }
 
-  public Response buildOperationOutcomeDto(ErpResponse response) {
+  public Response buildOperationOutcomeDto(FhirBResponse<?> response) {
     val oo = response.getAsOperationOutcome();
     val dto = new OperationOutcome();
     dto.setErrorCode("-");
@@ -324,9 +335,8 @@ public class ErpApiServiceImpl extends ErpApiService {
     Gson gson = new GsonBuilder().create();
     String json = gson.toJson(body);
     JSONObject object = new JSONObject(json);
-    val dispReqMessage = new CommunicationDisReqMessage(SupplyOptionsType.DELIVERY, null);
+
     String taskId;
-    String telematikId;
     try {
       taskId = object.get("prescriptionId").toString();
     } catch (JSONException e) {
@@ -342,6 +352,8 @@ public class ErpApiServiceImpl extends ErpApiService {
     }
     val task = res.getExpectedResource().getTask();
     val accessCode = task.getAccessCode().getValue();
+
+    String telematikId;
     try {
       telematikId = object.get("telematikId").toString();
     } catch (JSONException e) {
@@ -349,12 +361,21 @@ public class ErpApiServiceImpl extends ErpApiService {
           .entity(new ApiResponseMessage(ApiResponseMessage.ERROR, "Entry telematikId is required"))
           .build();
     }
+    val dispReqMessageBuilder = CommunicationDisReqMessage.forV1();
+    try {
+      val supplyOptionsType = object.get("supplyOptionsType").toString();
+      dispReqMessageBuilder.supplyOptionsType(SupplyOptionsType.valueOf(supplyOptionsType));
+    } catch (JSONException e) {
+      // default value if supplyOptionsType is not provided
+      dispReqMessageBuilder.supplyOptionsType(SupplyOptionsType.ON_PREMISE);
+    }
+
     val erxCommunication =
-        ErxCommunicationBuilder.forDispenseRequest(dispReqMessage)
+        ErxCommunicationBuilder.forDispenseRequest(dispReqMessageBuilder.build())
             .basedOn(taskId, accessCode)
             .receiver(telematikId)
             .flowType(task.getFlowType())
-            .version(ErpWorkflowVersion.V1_4)
+            .version(ErpWorkflowVersion.V1_5)
             .build();
 
     val response = patient.erpRequest(new CommunicationPostCommand(erxCommunication));
@@ -425,12 +446,39 @@ public class ErpApiServiceImpl extends ErpApiService {
     }
     val response = patient.erpRequest(new TaskGetByIdCommand(TaskId.from(id)));
     if (response.isOperationOutcome()) {
+      // The E-Rezept-FD refuses to hand out an aborted Task by id (410 Gone, "Task has already
+      // been deleted"), while the Task search still lists it with status 'cancelled' - which is
+      // how the insurant sees it in their FdV. Fall back to the search for that case only, so
+      // that genuine errors (unknown id, missing authorisation) keep their original response.
+      if (response.getStatusCode() == 410) {
+        val cancelledTask = findTaskInTaskSearch(id);
+        if (cancelledTask.isPresent()) {
+          return responseBuilder.entity(PrescriptionDataMapper.from(cancelledTask.get())).build();
+        }
+      }
       return buildOperationOutcomeDto(response);
     }
     val kbvBundle = response.getExpectedResource().getKbvBundle().get();
     val prescription =
         PrescriptionDataMapper.from(response.getExpectedResource().getTask(), kbvBundle);
     return responseBuilder.entity(prescription).build();
+  }
+
+  /**
+   * Looks up a Task in the Task search, which - unlike the read by id - still delivers Tasks that
+   * have been aborted.
+   *
+   * @param id the prescription id to look for
+   * @return the Task, or empty if the search failed or does not contain the Task
+   */
+  private Optional<ErxTask> findTaskInTaskSearch(String id) {
+    val search = patient.erpRequest(TaskSearch.getSortedByAuthoredOn(SortOrder.DESCENDING));
+    if (search.isOperationOutcome() || search.getStatusCode() > 299) {
+      return Optional.empty();
+    }
+    return search.getExpectedResource().getTasks().stream()
+        .filter(task -> task.getPrescriptionId().getValue().equals(id))
+        .findFirst();
   }
 
   @Override
@@ -562,7 +610,7 @@ public class ErpApiServiceImpl extends ErpApiService {
     }
     val euAccessCode =
         StringUtils.isNotBlank(accessCode) ? EuAccessCode.from(accessCode) : EuAccessCode.random();
-    val isoCountryCode = IsoCountryCode.valueOf(country);
+    val isoCountryCode = IsoCountryCodeNCPeH.valueOf(country);
     val response = patient.erpRequest(new EuGrantAccessPostCommand(euAccessCode, isoCountryCode));
     if (response.isOperationOutcome()) {
       return buildOperationOutcomeDto(response);
@@ -618,11 +666,24 @@ public class ErpApiServiceImpl extends ErpApiService {
     if (response.isOperationOutcome()) {
       return buildOperationOutcomeDto(response);
     }
-    // request Task by ID to access the kbvBundle of the prescription
-    val erxPresBundle = patient.erpRequest(new TaskGetByIdCommand(TaskId.from(id)));
-    val kbvBundle = erxPresBundle.getExpectedResource().getKbvBundle().get();
-
-    val prescriptionDto = PrescriptionDataMapper.from(response.getExpectedResource(), kbvBundle);
+    // The patch itself is done at this point. Requesting the Task by ID only enriches the
+    // response with the patient, practitioner and medication data of its kbvBundle, and reading
+    // that bundle validates its QES signature. That validation can fail on otherwise usable test
+    // data, so fall back to the task-only mapping instead of failing the whole request.
+    Prescription prescriptionDto;
+    try {
+      // request Task by ID to access the kbvBundle of the prescription
+      val erxPresBundle = patient.erpRequest(new TaskGetByIdCommand(TaskId.from(id)));
+      val kbvBundle = erxPresBundle.getExpectedResource().getKbvBundle().get();
+      prescriptionDto = PrescriptionDataMapper.from(response.getExpectedResource(), kbvBundle);
+    } catch (FhirValidationException e) {
+      log.warn(
+          "Could not read the kbvBundle of prescription {}, returning the patched task without its"
+              + " prescription details",
+          id,
+          e);
+      prescriptionDto = PrescriptionDataMapper.from(response.getExpectedResource());
+    }
     prescriptionDto.setEuRedeemableByPatient(isRedeemable);
     return responseBuilder.entity(prescriptionDto).build();
   }

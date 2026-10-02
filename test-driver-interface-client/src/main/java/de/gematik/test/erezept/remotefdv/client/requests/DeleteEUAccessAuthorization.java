@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 gematik GmbH
+ * Copyright 2026 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import de.gematik.test.erezept.remotefdv.client.HttpRequestInfo;
 import java.util.List;
 import lombok.Getter;
 
-public class DeleteEUAccessAuthorization implements PatientRequests<String> {
+public class DeleteEUAccessAuthorization implements FdVRequests<String> {
   private final @Getter Class<String> type = String.class;
   private final @Getter TypeReference<List<String>> typeReference = new TypeReference<>() {};
 

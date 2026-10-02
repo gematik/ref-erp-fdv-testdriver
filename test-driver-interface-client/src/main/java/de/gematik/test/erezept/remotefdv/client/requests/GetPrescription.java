@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 gematik GmbH
+ * Copyright 2026 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public class GetPrescription implements PatientRequests<Prescription> {
+public class GetPrescription implements FdVRequests<Prescription> {
   private final Class<Prescription> type = Prescription.class;
 
   private final TypeReference<List<Prescription>> typeReference = new TypeReference<>() {};

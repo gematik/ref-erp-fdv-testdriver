@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 gematik GmbH
+ * Copyright 2026 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import de.gematik.test.erezept.fhir.r4.erp.ErxTask;
 import de.gematik.test.erezept.fhir.r4.kbv.KbvErpMedication;
 import de.gematik.test.erezept.fhir.values.AccessCode;
 import de.gematik.test.erezept.fhir.values.PrescriptionId;
+import de.gematik.test.erezept.fhir.valuesets.MedicationCategory;
 import de.gematik.test.erezept.fhir.valuesets.MedicationType;
 import de.gematik.test.erezept.fhir.valuesets.PrescriptionFlowType;
 import de.gematik.test.erezept.remotefdv.server.mapping.PrescriptionDataMapper;
@@ -46,10 +47,12 @@ class PrescriptionDataMapperTest {
   @Test
   void shouldCreatePrescriptionFromErxTask() {
     val erxTask = mock(ErxTask.class);
-    val fhirParser = new FhirParser();
+    val fhirParser = new FhirParser(); // next line fails without this
     val medication = mock(KbvErpMedication.class);
 
     when(medication.getMedicationType()).thenReturn(Optional.of(MedicationType.INGREDIENT));
+    // KbvErpMedicationRequestBuilder.medication() reads the category since erp-fhir 1.7.1
+    when(medication.getCategoryFirstRep()).thenReturn(MedicationCategory.C_00);
     when(medication.getId()).thenReturn(UUID.randomUUID().toString());
     when(medication.getResourceType()).thenReturn(ResourceType.Medication);
     when(erxTask.getStatus()).thenReturn(Task.TaskStatus.COMPLETED);

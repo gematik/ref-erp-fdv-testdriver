@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 gematik GmbH
+ * Copyright 2026 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,6 +88,7 @@ public class PrescriptionDataMapper {
     val lastMedDispense = task.getLastMedicationDispenseDate();
     lastMedDispense.ifPresent(
         instant -> prescription.setLastMedicationDispense(instant.toString()));
-    prescription.setEuRedeemableByProperties(true); // TODO find this parameter from ErxTask
+    prescription.setEuRedeemableByPatient(task.isRedeemableByAuthorization(true));
+    prescription.setEuRedeemableByProperties(task.isRedeemableByProperties(true));
   }
 }
